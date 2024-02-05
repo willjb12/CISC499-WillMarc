@@ -85,18 +85,54 @@ def autofill(driver):
 
 # check for sso options
 def sso_check(driver):
-    sso_indicators = [["SIGN","WITH"],["CONTINUE","WITH"],["LOG","WITH"]]
-    for indicators in sso_indicators:
-        a = indicators[0]
-        b = indicators[1]
-        sso_elems =  driver.find_elements(By.XPATH,"//*[contains(translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), '"+a+"') and contains(translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'"+b+"')]")
-        if (len(sso_elems) >= 1):
-            for b in sso_elems:
-                try:
-                    b.click()
-           
-                    return True
-                except:
-                    None
+    found_sso_elems = []
+    attributes = ["*","id","aria-label","autocomplete","title"]
+    sso_ind_str = ["LOG IN WITH", "SIGN IN WITH", "CONTINUE WITH", "SIGN UP WITH"]
+    sso_ind_array = [["SIGN","WITH"],["CONTINUE","WITH"],["LOG","WITH"],["CONT","WITH"]]
     
-    return False
+    #check for sso in attributes
+    for a in attributes:
+        try:
+            found_sso_elems += driver.find_elements(By.XPATH,"//button[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'SSO')]")
+        except Exception as e:
+                None
+        try:
+            found_sso_elems += driver.find_elements(By.XPATH,"//*[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'SSO')]")  
+        except Exception as e:
+                None
+        try:
+            found_sso_elems += driver.find_elements(By.XPATH,"//iframe[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'SSO')]")  
+        except Exception as e:
+                None
+        
+        #check for multi-word indicators in attributes
+        for i in sso_ind_array:
+            first = i[0]
+            second = i[1]
+            try:
+                found_sso_elems += driver.find_elements(By.XPATH, "//button[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), '" + first + "') and contains(translate(@" + a + ", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), '" + second + "')]")
+            except Exception as e:
+                None
+            try:
+                found_sso_elems += driver.find_elements(By.XPATH,"//iframe[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), '" + first + "') and contains(translate(@" + a + ", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), '" + second + "')]")
+            except Exception as e:
+                None
+            try:
+                found_sso_elems += driver.find_elements(By.XPATH,"//*[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), '" + first + "') and contains(translate(@" + a + ", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), '" + second + "')]")
+            except Exception as e:
+                None
+
+    #check in text for keywords
+    for j in sso_ind_str:
+        try:
+            found_sso_elems += driver.find_elements(By.XPATH,"//*[contains(translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'"+j+"')]")
+        except Exception as e:
+                None
+    
+    if len(found_sso_elems)>0:
+        for element in found_sso_elems:
+            if element.is_displayed():
+                return True
+        return False
+    else:
+        return False

@@ -11,8 +11,10 @@ import http_passwordsubmission
 import collecttls
 import csv
 
+websites = ["https://pinterest.com","https://www.instagram.com/","https://reddit.com","https://facebook.com","https://amazon.ca","https://twitter.com","https://wikipedia.org","https://yahoo.com","https://tiktok.com"]
 
-websites = ["https://pinterest.com", "https://reddit.com","https://facebook.com","https://amazon.ca"]
+
+
 db_attributes = ["sso_check TEXT"]
 
 #go to next line in the csv file
@@ -27,6 +29,7 @@ def read_next_csv_line():
 def begin_driver():
     driver = webdriver.Firefox()
     return driver
+
 #close driver
 def end_driver(driver):
     driver.quit()
@@ -119,22 +122,27 @@ def main():
         driver = begin_driver()
         driver.get(websites[0])
         start.pack_forget()
-        enrollment.pack()
+        enrollmentFrame.pack()
     #------------------------------------------------------------------------------------------------
 
     #enrollment frame -----------------------------------------------------------------------------
-    enrollment = tk.Frame(root)
-    enrollmentLabel = tk.Label(enrollment, text="Enrollment")
+    enrollmentFrame = tk.Frame(root)
+    enrollmentLabel = tk.Label(enrollmentFrame, text="Enrollment")
     enrollmentLabel.pack()
     currentwebsite = websites[0]
-    websiteLabel = tk.Label(enrollment, text=currentwebsite)
+    websiteLabel = tk.Label(enrollmentFrame, text=currentwebsite)
     websiteLabel.pack()
-    fillButton = tk.Button(enrollment,text="Fill",command=lambda : enrollment.autofill(driver))
-    gettlsInfoButton = tk.Button(enrollment, text="Get TLS Info", command=lambda : get_tls_info(currentwebsite))
-    initialHeaderButton = tk.Button(enrollment, text="Collect initial headers", command=lambda : http_initial(driver))
-    checkImmediateEmailButton = tk.Button(enrollment, text="Check for email", command=lambda : check_immediate_email(currentwebsite))
-    checkPasswordRequestButton = tk.Button(enrollment, text="Check HTTP requests for password submission", command=lambda : http_password_request(driver))
-    endButton = tk.Button(enrollment,text="End Session",command=lambda : end_session(driver,root))
+
+    fillButton = tk.Button(enrollmentFrame,text="Fill",command=lambda : enrollment.autofill(driver))
+    endButton = tk.Button(enrollmentFrame,text="End Session",command=lambda : end_session(driver,root))
+
+    fillButton = tk.Button(enrollmentFrame,text="Fill",command=lambda : enrollment.autofill(driver))
+    gettlsInfoButton = tk.Button(enrollmentFrame, text="Get TLS Info", command=lambda : get_tls_info(currentwebsite))
+    initialHeaderButton = tk.Button(enrollmentFrame, text="Collect initial headers", command=lambda : http_initial(driver))
+    checkImmediateEmailButton = tk.Button(enrollmentFrame, text="Check for email", command=lambda : check_immediate_email(currentwebsite))
+    checkPasswordRequestButton = tk.Button(enrollmentFrame, text="Check HTTP requests for password submission", command=lambda : http_password_request(driver))
+    endButton = tk.Button(enrollmentFrame,text="End Session",command=lambda : end_session(driver,root))
+
     c = 0
     
     def increment_and_next(driver):
@@ -145,8 +153,8 @@ def main():
             currentwebsite = websites[c]
         websiteLabel.config(text = currentwebsite)
         next(driver,c)
-    nextButton = tk.Button(enrollment,text="Next site",command=lambda : increment_and_next(driver))
-    ssoButton = tk.Button(enrollment,text="Check SSO",command=lambda : sso_check(driver))
+    nextButton = tk.Button(enrollmentFrame,text="Next site",command=lambda : increment_and_next(driver))
+    ssoButton = tk.Button(enrollmentFrame,text="Check SSO",command=lambda : sso_check(driver))
    
     
     nextButton.pack()

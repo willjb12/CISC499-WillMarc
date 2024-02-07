@@ -16,6 +16,8 @@ websites = ["https://www.instagram.com/","https://pinterest.com","https://reddit
 
 
 
+
+
 db_attributes = ["sso_check TEXT","tls_version TEXT","cipher_suite TEXT"]
 
 #go to next line in the csv file
@@ -24,6 +26,7 @@ def read_next_csv_line():
         reader = csv.reader(csv_file)
         next_line = next(reader, None)
         return next_line
+
     
 
 # initialize driver
@@ -98,7 +101,6 @@ def http_password_request(driver):
 def get_tls_info(currentwebsite,url,cursor,connection):
     tls_version, cipher_suite = collecttls.get_tls_info(currentwebsite)
     print("TLS version:" + tls_version)
-    print("Cipher suite:" + cipher_suite[0])
     cursor.execute('UPDATE websites SET tls_version = ? WHERE url = ?', (tls_version, url))
     cursor.execute('UPDATE websites SET cipher_suite = ? WHERE url = ?', (cipher_suite[0], url))
     connection.commit()
@@ -106,6 +108,7 @@ def get_tls_info(currentwebsite,url,cursor,connection):
     #cipher_suite[1] is tls/ssl protocol version
     #cipher_suite[2] is number of secret bits used for encryption
     print("Updated "+url+" to TLS Version: "+tls_version )
+
 
 def create_db_row(url,cursor,connection):
     
@@ -127,6 +130,13 @@ def create_db_row(url,cursor,connection):
 
 
 def main():
+    #turn sign up url file into list
+    websites = []
+    with open("suurls.csv", 'r') as file:
+        for line in file:
+            websites.append(line.rstrip())
+
+
     #initialize driver
     driver = None
     

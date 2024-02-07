@@ -1,8 +1,8 @@
 from seleniumwire import webdriver
  
 def scrape_requests(driver):
-    email = ""
-    password = ""
+    email = "mw499test1@gmail.com"
+    password = "DummyPassword1!"
     requests = driver.requests
 
     post_pass = None

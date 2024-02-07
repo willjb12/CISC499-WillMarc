@@ -16,13 +16,6 @@ websites = ["https://pinterest.com","https://www.instagram.com/","https://reddit
 
 
 db_attributes = ["sso_check TEXT"]
-
-#go to next line in the csv file
-def read_next_csv_line():
-    with open("suurls.csv", 'r', newline='', encoding='utf-8') as csv_file:
-        reader = csv.reader(csv_file)
-        next_line = next(reader, None)
-        return next_line
     
 
 # initialize driver
@@ -71,7 +64,7 @@ def http_password_request(driver):
 def get_tls_info(currentwebsite):
     tls_version, cipher_suite = collecttls.get_tls_info(currentwebsite)
     print("TLS version:" + tls_version)
-    #print("Cipher suite:" + cipher_suite) 
+    print("Cipher suite:" + cipher_suite[0]) 
 
 
 #next website in list
@@ -91,6 +84,13 @@ def new_driver(driver):
     return new_driver
 
 def main():
+    #turn sign up url file into list
+    websites = []
+    with open("suurls.csv", 'r') as file:
+        for line in file:
+            websites.append(line.rstrip())
+
+
     #initialize driver
     driver = None
 

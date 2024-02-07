@@ -5,12 +5,12 @@ from urllib.parse import urlparse
 import dkim
 
 def from_dkim(bytemail):
-     try:
-         dkim_domain = dkim.verify(bytemail).lower()
-     except dkim.VerifyError:
-         return None
+    try:
+        dkim_domain = dkim.verify(bytemail).lower()
+    except dkim.VerifyError:
+        return None
 
-     return dkim_domain
+    return dkim_domain
 
 def from_expected(domain, bytemail):
     message = email.message_from_bytes(bytemail)

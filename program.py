@@ -12,9 +12,8 @@ import collecttls
 import csv
 from urllib.parse import urlparse
 
-
 db_attributes = ["sso_check TEXT","tls_version TEXT","cipher_suite TEXT","csp_data TEXT","inline_script_no_nonce TEXT", "wildcard TEXT", "missing_object_src TEXT", "safe_framing TEXT",
-                 "hsts TEXT", "xframe TEXT", "xxss TEXT", "referrer_policy TEXT", "feature_policy TEXT"]
+                 "hsts TEXT", "xframe TEXT", "xxss TEXT", "referrer_policy TEXT", "feature_policy TEXT", "pass_message_found TEXT","pass_request_type TEXT", "pass_plaintext TEXT"]
 
 #go to next line in the csv file
 def read_next_csv_line():
@@ -118,13 +117,23 @@ def check_immediate_email(url):
     print("Email from target source detected:" + str(result))
 
 #check how the password is sent in the http request
-def http_password_request(driver):
+def http_password_request(driver,url,connection,cursor):
     message_found, request_type, sent_in_plaintext = http_passwordsubmission.scrape_requests(driver)
     
     print("--HTTP Password Submission--")
     print("Message Found: "+str(message_found))
+    #pass_message_found
+    cursor.execute('UPDATE websites SET pass_message_found = ? WHERE url = ?', (message_found, url))
+
     print("Sent in Plaintext: "+str(sent_in_plaintext))
+    #pass_plaintext
+    cursor.execute('UPDATE websites SET pass_plaintext = ? WHERE url = ?', (sent_in_plaintext, url))
+    
     print("Request type: "+str(request_type))
+    #pass_request_type
+    cursor.execute('UPDATE websites SET pass_request_type = ? WHERE url = ?', (request_type, url))
+    connection.commit()
+    print("Updated "+url+" password request information")
 
 #check the tls info and certificate
 def get_tls_info(currentwebsite,url,cursor,connection):
@@ -228,8 +237,8 @@ def main():
     fillButton = tk.Button(enrollmentFrame,text="Fill",command=lambda : enrollment.autofill(driver))
     gettlsInfoButton = tk.Button(enrollmentFrame, text="Get TLS Info", command=lambda : get_tls_info(currentwebsite,currentWebsiteParsed,cursor,connection))
     initialHeaderButton = tk.Button(enrollmentFrame, text="Collect initial headers", command=lambda : http_initial(driver,connection,cursor,currentWebsiteParsed))
-    checkImmediateEmailButton = tk.Button(enrollmentFrame, text="Check for email", command=lambda : check_immediate_email(currentwebsite))
-    checkPasswordRequestButton = tk.Button(enrollmentFrame, text="Check HTTP requests for password submission", command=lambda : http_password_request(driver))
+    checkImmediateEmailButton = tk.Button(enrollmentFrame, text="Check for email *WIP*", command=lambda : check_immediate_email(currentwebsite))
+    checkPasswordRequestButton = tk.Button(enrollmentFrame, text="Check HTTP requests for password submission", command=lambda : http_password_request(driver,currentWebsiteParsed,connection,cursor))
     endButton = tk.Button(enrollmentFrame,text="End Session",command=lambda : end_session(driver,root))
 
     c = 0

@@ -131,11 +131,13 @@ def create_db_row(url,cursor,connection):
 
 def main():
     #turn sign up url file into list
+    
     websites = []
     with open("suurls.csv", 'r') as file:
-        for line in file:
+        lines = file.readlines()
+        for line in lines:
             websites.append(line.rstrip())
-
+    
 
     #initialize driver
     driver = None

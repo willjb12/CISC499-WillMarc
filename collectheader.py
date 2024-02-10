@@ -42,7 +42,7 @@ def parse_csp(csp_data):
         script_src_values = script_src_match.group(1).split()
         whitelists.append(script_src_values)
         
-        if "'unsafe-inline'" in script_src_values and "'nonce" not in ' '.join(script_src_values):
+        if "'unsafe-inline'" in script_src_values and "'nonce" not in ' '.join(script_src_values) and 'strict-dynamic' not in ' '.join(script_src_values):
             usage_unsafe_inline = True
 
 
@@ -101,7 +101,7 @@ def parse_csp(csp_data):
         
 
 def csp_search(driver):
-    driver.implicitly_wait(2)
+    driver.implicitly_wait(5)
     csp_data = None
     other_headers = None
     meta_element = driver.find_element(By.XPATH, "//meta[contains(@http-equiv, 'Content-Security-Policy')]")
@@ -160,7 +160,9 @@ def main(driver):
     csp_data, other_headers = scrape_header(first_request)
     
     csp_data_new = None
-    if csp_data == None or csp_data == "default-src 'none'; frame-ancestors 'none'; base-uri 'none';":
+    if csp_data == None or \
+       csp_data == "default-src 'none'; frame-ancestors 'none'; base-uri 'none';" or \
+       csp_data == "default-src 'none'; style-src 'unsafe-inline'; sandbox":
         try:
             csp_data_new, other_headers_new = csp_search(driver)
         except:

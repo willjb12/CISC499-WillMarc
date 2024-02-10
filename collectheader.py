@@ -7,7 +7,6 @@ import re
 
 def parse_csp(csp_data):
     whitelists = []
-    print(csp_data)
     usage_unsafe_inline = False
     use_of_wildcards = False
     missing_object_src = False
@@ -104,9 +103,11 @@ def csp_search(driver):
     driver.implicitly_wait(5)
     csp_data = None
     other_headers = None
-    meta_element = driver.find_element(By.XPATH, "//meta[contains(@http-equiv, 'Content-Security-Policy')]")
+    try:
+        meta_element = driver.find_element(By.XPATH, "//meta[contains(@http-equiv, 'Content-Security-Policy')]")
+    except: 
+        meta_element = None
 
-    
     for request in driver.requests:
         csp_data = request.response.headers.get("content-security-policy")
         if csp_data != None and \
@@ -123,7 +124,8 @@ def csp_search(driver):
     
     if csp_data == None:
         try:
-            csp_data = meta_element.get_attribute("content")
+            if meta_element!=None:
+                csp_data = meta_element.get_attribute("content")
         except:
             print("No CSP data found in HTML")
 
@@ -207,6 +209,6 @@ def main(driver):
     
 
     
-    return usage_unsafe_inline, use_of_wildcards, missing_object_src, safe_framing, \
+    return csp_data,usage_unsafe_inline, use_of_wildcards, missing_object_src, safe_framing, \
             supports_hsts, supports_xframe, supports_xxss, supports_referrer_policy, supports_feature_policy  
 

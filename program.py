@@ -13,7 +13,8 @@ import csv
 from urllib.parse import urlparse
 
 
-db_attributes = ["sso_check TEXT","tls_version TEXT","cipher_suite TEXT"]
+db_attributes = ["sso_check TEXT","tls_version TEXT","cipher_suite TEXT","csp_data TEXT","inline_script_no_nonce TEXT", "wildcard TEXT", "missing_object_src TEXT", "safe_framing TEXT",
+                 "hsts TEXT", "xframe TEXT", "xxss TEXT", "referrer_policy TEXT", "feature_policy TEXT"]
 
 #go to next line in the csv file
 def read_next_csv_line():
@@ -59,22 +60,58 @@ def sso_check(driver,url,connection,cursor):
     connection.commit()
     print("Updated "+url+" to SSO: "+str(result))
 
+
+
 #collect initial http information
-def http_initial(driver):
-    usage_unsafe_inline, use_of_wildcards, missing_object_src, safe_framing, \
+def http_initial(driver,connection,cursor,url):
+    csp_data,usage_unsafe_inline, use_of_wildcards, missing_object_src, safe_framing, \
         supports_hsts, supports_xframe, supports_xxss, supports_referrer_policy, supports_feature_policy = collectheader.main(driver)
+    print("CSP Data: "+csp_data)
+        #csp_data
+    cursor.execute('UPDATE websites SET csp_data = ? WHERE url = ?', (csp_data, url))
+
     print("CSP Check--------------------------------------")
+
     print("Allows inline scripts without nonce:" + str(usage_unsafe_inline))
+        #inline_script_no_nonce
+    cursor.execute('UPDATE websites SET inline_script_no_nonce = ? WHERE url = ?', (usage_unsafe_inline, url))
+
     print("At least one directive allows wildcards:" + str(use_of_wildcards))
+        #wildcard
+    cursor.execute('UPDATE websites SET wildcard = ? WHERE url = ?', (use_of_wildcards, url))
+
     print("Lacks directives for object source:" + str(missing_object_src))
+        #missing_object_src
+    cursor.execute('UPDATE websites SET missing_object_src = ? WHERE url = ?', (missing_object_src, url))
+
     print("Has safe framing policy in CSP:" + str(safe_framing))
+        #safe_framing
+    cursor.execute('UPDATE websites SET safe_framing = ? WHERE url = ?', (safe_framing, url))
+
     print("Other security headers--------------------------")
     print("Enforces HTTP Strict Transport Security:" + str(supports_hsts))
+        #hsts
+    cursor.execute('UPDATE websites SET hsts = ? WHERE url = ?', (supports_hsts, url))
+
     print("x-frame-options exist and do not allow wildcard:" + str(supports_xframe))
+        #xframe
+    cursor.execute('UPDATE websites SET xframe = ? WHERE url = ?', (supports_xframe, url))
+
     print("x-xss-protection exists:" + str(supports_xxss))
+        #xxss
+    cursor.execute('UPDATE websites SET xxss = ? WHERE url = ?', (supports_xxss, url))
+
     print("Has strong referrer policy:" + str(supports_referrer_policy))
+        #referrer_policy
+    cursor.execute('UPDATE websites SET referrer_policy = ? WHERE url = ?', (supports_referrer_policy, url))
+
     print("feature-policy exists:" + str(supports_feature_policy))
-    
+        #feature_policy
+    cursor.execute('UPDATE websites SET feature_policy = ? WHERE url = ?', (supports_feature_policy, url))
+    connection.commit()
+    print("Updated "+url+" HTTP header and CSP information")
+
+
 #check if an email is immediately sent on account creation, from an address associated with the current website
 def check_immediate_email(url):
     result = emailverification.immediate_feedback(url)
@@ -138,6 +175,9 @@ def main():
     connection = sqlite3.connect(cwd+"/db/test.db")
     cursor = connection.cursor()
 
+    ## deleting db lines 
+    #cursor.execute('''DROP TABLE IF EXISTS websites''')
+    #connection.commit()
 
     creation_string =("CREATE TABLE IF NOT EXISTS websites (url TEXT PRIMARY KEY")
     for entry in db_attributes:
@@ -187,7 +227,7 @@ def main():
 
     fillButton = tk.Button(enrollmentFrame,text="Fill",command=lambda : enrollment.autofill(driver))
     gettlsInfoButton = tk.Button(enrollmentFrame, text="Get TLS Info", command=lambda : get_tls_info(currentwebsite,currentWebsiteParsed,cursor,connection))
-    initialHeaderButton = tk.Button(enrollmentFrame, text="Collect initial headers", command=lambda : http_initial(driver))
+    initialHeaderButton = tk.Button(enrollmentFrame, text="Collect initial headers", command=lambda : http_initial(driver,connection,cursor,currentWebsiteParsed))
     checkImmediateEmailButton = tk.Button(enrollmentFrame, text="Check for email", command=lambda : check_immediate_email(currentwebsite))
     checkPasswordRequestButton = tk.Button(enrollmentFrame, text="Check HTTP requests for password submission", command=lambda : http_password_request(driver))
     endButton = tk.Button(enrollmentFrame,text="End Session",command=lambda : end_session(driver,root))

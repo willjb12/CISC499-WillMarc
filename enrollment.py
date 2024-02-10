@@ -3,10 +3,15 @@ from selenium.webdriver.common.by import By
 import time
 import tkinter as tk
 
+secrets = []
+with open("secret.txt", 'r') as file:
+    lines = file.readlines()
+    for line in lines:
+        secrets.append(line.rstrip())
 
-email="example@example.com"
-username="exampleguy"
-password="secret"
+email=secrets[0]
+username="test_username"
+password=secrets[1]
 
 
 #AUTOFILL HELPER FUNCTIONS--------------------------------------------------------------------

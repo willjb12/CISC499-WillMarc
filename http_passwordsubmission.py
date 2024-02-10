@@ -1,9 +1,17 @@
 from seleniumwire import webdriver
  
 def scrape_requests(driver):
-    email = ""
-    password = ""
+    secrets = []
+    with open("secret.txt", 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            secrets.append(line.rstrip())
+
+    email = secrets[0]
+    password = secrets[1]
     requests = driver.requests
+    websites = []
+   
 
     post_pass = None
     get_pass = None

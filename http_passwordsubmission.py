@@ -1,8 +1,8 @@
 from seleniumwire import webdriver
  
 def scrape_requests(driver):
-    email = "mw499test1@gmail.com"
-    password = "DummyPassword1!"
+    email = ""
+    password = ""
     requests = driver.requests
 
     post_pass = None
@@ -72,11 +72,6 @@ def scrape_requests(driver):
     else:
         request_type = "Both"
 
-
-    
-    print("Message Found:" + str(message_found))
-    print("Request Type:" + request_type)
-    print("Sent in Plaintext:" + str(sent_in_plaintext))
     
     print("Post Message:")
     if post_pass:

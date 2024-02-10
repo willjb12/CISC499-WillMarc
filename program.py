@@ -124,6 +124,7 @@ def create_db_row(url,cursor,connection):
 
 def main():
     #turn sign up url file into list
+    
     websites = []
     with open("suurls.csv", 'r') as file:
         lines = file.readlines()

@@ -12,11 +12,6 @@ import collecttls
 import csv
 from urllib.parse import urlparse
 
-websites = ["https://www.instagram.com/","https://pinterest.com","https://reddit.com","https://facebook.com","https://amazon.ca","https://twitter.com","https://wikipedia.org","https://yahoo.com","https://tiktok.com"]
-
-
-
-
 
 db_attributes = ["sso_check TEXT","tls_version TEXT","cipher_suite TEXT"]
 
@@ -26,8 +21,6 @@ def read_next_csv_line():
         reader = csv.reader(csv_file)
         next_line = next(reader, None)
         return next_line
-
-    
 
 # initialize driver
 def begin_driver():
@@ -51,7 +44,7 @@ def end_session(driver,window):
     window.destroy()
 
 #next website in list
-def next(driver,counter):
+def next(driver,counter,websites):
     driver = new_driver(driver)
     if counter < len(websites):
         driver.get(websites[counter])
@@ -82,7 +75,6 @@ def http_initial(driver):
     print("Has strong referrer policy:" + str(supports_referrer_policy))
     print("feature-policy exists:" + str(supports_feature_policy))
     
-
 #check if an email is immediately sent on account creation, from an address associated with the current website
 def check_immediate_email(url):
     result = emailverification.immediate_feedback(url)
@@ -108,6 +100,7 @@ def get_tls_info(currentwebsite,url,cursor,connection):
     #cipher_suite[1] is tls/ssl protocol version
     #cipher_suite[2] is number of secret bits used for encryption
     print("Updated "+url+" to TLS Version: "+tls_version )
+
 
 
 def create_db_row(url,cursor,connection):
@@ -137,8 +130,6 @@ def main():
         lines = file.readlines()
         for line in lines:
             websites.append(line.rstrip())
-    
-
     #initialize driver
     driver = None
     
@@ -204,6 +195,7 @@ def main():
     c = 0
     
     def increment_and_next():
+        nonlocal websites
         nonlocal c
         nonlocal driver
         nonlocal currentwebsite
@@ -215,7 +207,7 @@ def main():
             currentWebsiteParsed = urlparse(currentwebsite).netloc.lower()
             websiteLabel.config(text = currentWebsiteParsed)
             create_db_row(currentWebsiteParsed,cursor,connection)
-            driver = next(driver,c)
+            driver = next(driver,c,websites)
         
     nextButton = tk.Button(enrollmentFrame,text="Next site",command=lambda : increment_and_next())
     ssoButton = tk.Button(enrollmentFrame,text="Check SSO",command=lambda : sso_check(driver,currentWebsiteParsed,connection,cursor))

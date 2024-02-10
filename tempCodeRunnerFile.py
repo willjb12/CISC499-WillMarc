@@ -1,2 +1,0 @@
-
-# print("Column Names:", columns)

@@ -1,5 +1,6 @@
 from seleniumwire import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
 import time
 import tkinter as tk
 import sqlite3
@@ -24,7 +25,9 @@ def read_next_csv_line():
 
 # initialize driver
 def begin_driver():
-    driver = webdriver.Firefox()
+    firefoxOptions = Options()
+    firefoxOptions.page_load_strategy = 'eager'
+    driver = webdriver.Firefox(options=firefoxOptions)
     return driver
 
 #close driver
@@ -181,7 +184,7 @@ def main():
     
     #initialize db connection
     cwd = os.getcwd()
-    connection = sqlite3.connect(cwd+"/db/test.db")
+    connection = sqlite3.connect(cwd+"/db/test2.db")
     cursor = connection.cursor()
 
     ## deleting db lines 
@@ -214,7 +217,7 @@ def main():
         driver = begin_driver()
         #enter first value
         driver.get(currentwebsite)
-        create_db_row(currentWebsiteParsed,cursor,connection)
+        
 
 
         start.pack_forget()
@@ -232,7 +235,7 @@ def main():
     websiteLabel.pack()
 
     fillButton = tk.Button(enrollmentFrame,text="Fill",command=lambda : enrollment.autofill(driver))
-    
+    addSiteButton = tk.Button(enrollmentFrame,text="Add Site",command=lambda : create_db_row(currentWebsiteParsed,cursor,connection))
 
     fillButton = tk.Button(enrollmentFrame,text="Fill",command=lambda : enrollment.autofill(driver))
     gettlsInfoButton = tk.Button(enrollmentFrame, text="Get TLS Info", command=lambda : get_tls_info(currentwebsite,currentWebsiteParsed,cursor,connection))
@@ -255,13 +258,13 @@ def main():
             currentwebsite = websites[c]
             currentWebsiteParsed = urlparse(currentwebsite).netloc.lower()
             websiteLabel.config(text = currentWebsiteParsed)
-            create_db_row(currentWebsiteParsed,cursor,connection)
             driver = next(driver,c,websites)
         
+    
     nextButton = tk.Button(enrollmentFrame,text="Next site",command=lambda : increment_and_next())
     ssoButton = tk.Button(enrollmentFrame,text="Check SSO",command=lambda : sso_check(driver,currentWebsiteParsed,connection,cursor))
    
-    
+    addSiteButton.pack()
     nextButton.pack()
     fillButton.pack()
     ssoButton.pack()

@@ -54,6 +54,50 @@ def find_email_input(driver):
             None
     return email_fields
 
+def find_firstname_input(driver):
+    fname_fields = []
+    attributes = ["*","name","id","aria-label","autocomplete"]
+    for a in attributes:
+        try:
+            fname_fields += driver.find_elements(By.XPATH,"//input[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'FIRSTNAME')]")
+        except:
+            None
+        try:
+            fname_fields += driver.find_elements(By.XPATH,"//*[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'FIRSTNAME')]")
+        except:
+            None
+        try:
+            fname_fields += driver.find_elements(By.XPATH, "//input[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'FIRST') and contains(translate(@" + a + ", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'NAME')]")
+        except Exception as e:
+            None
+        try:
+            fname_fields += driver.find_elements(By.XPATH, "//*[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'FIRST') and contains(translate(@" + a + ", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'NAME')]")
+        except Exception as e:
+            None
+    return fname_fields
+
+def find_lastname_input(driver):
+    lname_fields = []
+    attributes = ["*","name","id","aria-label","autocomplete"]
+    for a in attributes:
+        try:
+            lname_fields += driver.find_elements(By.XPATH,"//input[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'LASTNAME')]")
+        except:
+            None
+        try:
+            lname_fields += driver.find_elements(By.XPATH,"//*[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'LASTNAME')]")
+        except:
+            None
+        try:
+            lname_fields += driver.find_elements(By.XPATH, "//input[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'LAST') and contains(translate(@" + a + ", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'NAME')]")
+        except Exception as e:
+            None
+        try:
+            lname_fields += driver.find_elements(By.XPATH, "//*[contains(translate(@"+a+", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'LAST') and contains(translate(@" + a + ", 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'NAME')]")
+        except Exception as e:
+            None
+    return lname_fields
+
 
 #--------------------------------------------------------------------------
 
@@ -65,6 +109,10 @@ def autofill(driver):
     password_inputs = list(dict.fromkeys(password_inputs))
     email_inputs = find_email_input(driver)
     email_inputs = list(dict.fromkeys(email_inputs))
+    fname_inputs = find_firstname_input(driver)
+    fname_inputs = list(dict.fromkeys(fname_inputs))
+    lname_inputs = find_lastname_input(driver)
+    lname_inputs = list(dict.fromkeys(lname_inputs))
     
     if email_inputs != None:
         for e in email_inputs:
@@ -85,6 +133,20 @@ def autofill(driver):
             try:
                 u.clear()
                 u.send_keys(username)
+            except:
+                None
+    if fname_inputs != None:
+        for f in fname_inputs:
+            try:
+                f.clear()
+                f.send_keys("John")
+            except:
+                None
+    if lname_inputs != None:
+        for l in lname_inputs:
+            try:
+                l.clear()
+                l.send_keys("Smith")
             except:
                 None
 

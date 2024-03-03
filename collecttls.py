@@ -18,5 +18,6 @@ def get_tls_info(currentwebsite):
             tls_version = ssock.version()
             cipher_suite = ssock.cipher()
             certificate = ssock.getpeercert()
+            authority = certificate['issuer'][1][0][1]
 
-            return tls_version, cipher_suite
+            return tls_version, cipher_suite, authority

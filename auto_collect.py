@@ -9,13 +9,202 @@ import time
 import collecttls
 import enrollment
 
-#test_users = ["testuser@gmail.com", "testuser1@gmail.com", "david1", "ยศกร", "ahmet"]
-test_users = ["testuser2@gmail.com"]
+test_users = ["testuser123@gmail.com", "david1@gmail.com", "stacey555@gmail.com", "will229@gmail.com"]
+#test_users = ["ahmet@gmail.com"]
 
 db_attributes = ["sso_check TEXT","tls_version TEXT","cipher_suite TEXT", "certificate_authority TEXT", "tls_error TEXT", ]
 
 skipped = 0
 login_found = 0
+
+def create_db_row(url,cursor,connection):
+    
+    #look for website entries in db that have id = to current URL
+    cursor.execute("SELECT * FROM websites WHERE url = ?", (url,))
+
+    #if there is no matches, create entry
+    if cursor.fetchone() is None:
+        insertion_string = "INSERT INTO websites VALUES ('"+url+"'"
+        for attribte in db_attributes:
+            insertion_string+= ",'N/A'"
+        insertion_string +=  ")"
+        cursor.execute(insertion_string)
+        print("Added "+url+" into database")
+    #if there is, the url is already an entry in the database
+    else:
+       print(url+" already exists in table")
+    connection.commit()
+
+def add_to_db(row, data_dict, cursor, connection):
+
+    create_db_row(row, cursor, connection)
+
+    # add sso to database
+    cursor.execute('UPDATE websites SET sso_check = ? WHERE url = ?', (data_dict["sso_check"], row))
+    connection.commit()
+    print("Updated "+row+" to SSO: ", data_dict["sso_check"])
+
+
+
+    # add tls to database
+    cursor.execute('UPDATE websites SET tls_version = ? WHERE url = ?', (data_dict["tls_version"], row))
+    cursor.execute('UPDATE websites SET cipher_suite = ? WHERE url = ?', (data_dict["cipher_suite"], row))
+    cursor.execute('UPDATE websites SET certificate_authority = ? WHERE url = ?', (data_dict["certificate_authority"], row))
+    cursor.execute('UPDATE websites SET tls_error = ? WHERE url = ?', (data_dict["tls_error"], row))
+    connection.commit()
+    print("Updated "+row+" to Cipher Suite: ",data_dict["cipher_suite"] )
+    print("Updated "+row+" to TLS Version: ",data_dict["tls_version"] )
+    print("Updated "+row+" to TLS Version: ",data_dict["tls_failed"] )
+
+
+    # add response header info to database
+    print("Header collection failed: ",data_dict["header_failed"])
+        #header_failed
+    cursor.execute('UPDATE websites SET header_failed = ? WHERE url = ?', (data_dict["header_failed"], row))
+
+    print("CSP Data: ",data_dict["csp_data"])
+        #csp_data
+    cursor.execute('UPDATE websites SET csp_data = ? WHERE url = ?', (data_dict["csp_data"], row))
+
+    print("CSP Check--------------------------------------")
+
+    print("Allows inline scripts:", data_dict["usage_unsafe_inline"])
+        #inline_script
+    cursor.execute('UPDATE websites SET usage_unsafe_inline = ? WHERE url = ?', (data_dict["usage_unsafe_inline"], row))
+
+    print("At least one directive allows wildcards:", data_dict["use_of_wildcards"])
+        #wildcard
+    cursor.execute('UPDATE websites SET wildcard = ? WHERE url = ?', (data_dict["use_of_wildcards"], row))
+
+    print("Lacks directives for object source:", data_dict["missing_object_src"])
+        #missing_object_src
+    cursor.execute('UPDATE websites SET missing_object_src = ? WHERE url = ?', (data_dict["missing_object_src"], row))
+
+    print("Frame ancestors data: ",data_dict["frame_ancestors_data"])
+        #frame_ancestors_data
+    cursor.execute('UPDATE websites SET frame_ancestors_data = ? WHERE url = ?', (data_dict["frame_ancestors_data"], row))
+
+    print("Number of frame ancestors:",data_dict["num_frame_ancestors"])
+        #num_frame_ancestors
+    cursor.execute('UPDATE websites SET num_frame_ancestors = ? WHERE url = ?', (data_dict["num_frame_ancestors"], row))
+
+    print("Has safe framing policy in CSP:", data_dict["safe_framing"])
+        #safe_framing
+    cursor.execute('UPDATE websites SET safe_framing = ? WHERE url = ?', (data_dict["safe_framing"], row))
+
+    print("Total policy length: ",data_dict["total_policy_length"])
+        #total_policy_length
+    cursor.execute('UPDATE websites SET total_policy_length = ? WHERE url = ?', (data_dict["total_policy_length"], row))
+
+    print("Total number of hashes: ",data_dict["num_hash"])
+        #num_hash
+    cursor.execute('UPDATE websites SET num_hash = ? WHERE url = ?', (data_dict["num_hash"], row))
+
+    print("Total number of nonces: ",data_dict["num_nonce"])
+        #num_nonce
+    cursor.execute('UPDATE websites SET num_nonce = ? WHERE url = ?', (data_dict["num_nonce"], row))
+
+    print("script-src number of hashes: ",data_dict["num_hash_script_src"])
+        #num_hash_script_src
+    cursor.execute('UPDATE websites SET num_hash_script_src = ? WHERE url = ?', (data_dict["num_hash_script_src"], row))
+
+    print("script-src number of nonces: ",data_dict["num_nonce_script_src"])
+        #num_nonce_script_src
+    cursor.execute('UPDATE websites SET num_nonce_script_src = ? WHERE url = ?', (data_dict["num_nonce_script_src"], row))
+
+    print("Usage of strict-dynamic: ",data_dict["usage_strict_dynamic"])
+        #usage_strict_dynamic
+    cursor.execute('UPDATE websites SET usage_strict_dynamic = ? WHERE url = ?', (data_dict["usage_strict_dynamic"], row))
+
+    print("Other security headers--------------------------")
+
+    print("Enforces HTTP Strict Transport Security:", data_dict["supports_hsts"])
+        #hsts
+    cursor.execute('UPDATE websites SET supports_hsts = ? WHERE url = ?', (data_dict["supports_hsts"], row))
+
+    print("HSTS data: ",data_dict["hsts_data"])
+        #hsts_data
+    cursor.execute('UPDATE websites SET hsts_data = ? WHERE url = ?', (data_dict["hsts_data"], row))
+
+    print("Enforces x-frame-options:", data_dict["supports_xframe"])
+        #supports_xframe
+    cursor.execute('UPDATE websites SET supports_xframe = ? WHERE url = ?', (data_dict["supports_xframe"], row))
+
+    print("XFO data: ",data_dict["xfo_data"])
+        #XFO_data
+    cursor.execute('UPDATE websites SET xfo_data = ? WHERE url = ?', (data_dict["xfo_data"], row))
+
+    print("x-xss-protection exists:", data_dict["supports_xxss"])
+        #xxss
+    cursor.execute('UPDATE websites SET supports_xxss = ? WHERE url = ?', (data_dict["supports_xxss"], row))
+
+    print("x-xss data: ",data_dict["xxss_data"])
+        #xxss_data
+    cursor.execute('UPDATE websites SET xxss_data = ? WHERE url = ?', (data_dict["xxss_data"], row))
+
+    print("Has referrer policy:", data_dict["supports_referrer_policy"])
+        #supports_referrer_policy
+    cursor.execute('UPDATE websites SET supports_referrer_policy = ? WHERE url = ?', (data_dict["supports_referrer_policy"], row))
+
+    print("Referrer policy data: ",data_dict["referrer_data"])
+        #referrer_data
+    cursor.execute('UPDATE websites SET referrer_data = ? WHERE url = ?', (data_dict["referrer_data"], row))
+
+    print("Feature policy exists:", data_dict["supports_feature_policy"])
+        #feature_policy
+    cursor.execute('UPDATE websites SET supports_feature_policy = ? WHERE url = ?', (data_dict["supports_feature_policy"], row))
+
+    print("Feature policy data: ",data_dict["feature_data"])
+        #feature_data
+    cursor.execute('UPDATE websites SET feature_data = ? WHERE url = ?', (data_dict["feature_data"], row))
+
+    print("cspro exists: ",data_dict["supports_cspro"])
+        #supports_cspro
+    cursor.execute('UPDATE websites SET supports_cspro = ? WHERE url = ?', (data_dict["supports_cspro"], row))
+
+    print("upgrade-insecure-reuests exists: ",data_dict["supports_upgrade"])
+        #supports_upgrade
+    cursor.execute('UPDATE websites SET supports_upgrade = ? WHERE url = ?', (data_dict["supports_upgrade"], row))
+
+
+    connection.commit()
+    print("Updated "+row+" HTTP header and CSP information")
+
+    print("--HTTP Password Submission--")
+    print("Message Found: ",data_dict["message_found"])
+        #pass_message_found
+    cursor.execute('UPDATE websites SET pass_message_found = ? WHERE url = ?', (data_dict["message_found"], row))
+
+    print("Sent in Plaintext: ",data_dict["sent_in_plaintext"])
+        #pass_plaintext
+    cursor.execute('UPDATE websites SET pass_plaintext = ? WHERE url = ?', (data_dict["sent_in_plaintext"], row))
+    
+    print("Request type: ",data_dict["request_type"])
+        #pass_request_type
+    cursor.execute('UPDATE websites SET pass_request_type = ? WHERE url = ?', (data_dict["request_type"], row))
+
+    print("Found POST request: ")
+    print(f"Keywords found in POST Request URL: ",data_dict["post_pass"].url)
+    print(f"POST Request Headers:", data_dict["post_pass"].headers)
+    print(f"POST Request Body:" ,data_dict["post_pass"].body)
+        #post_pass
+    cursor.execute('UPDATE websites SET post_pass = ? WHERE url = ?', (data_dict["post_pass"], row))
+
+    print("Found GET request: ")
+    print(f"Keywords found in GET Request URL:", data_dict["get_pass"].url)
+    print(f"GET Request Headers:",data_dict["get_pass"].headers)
+        #get_pass
+    cursor.execute('UPDATE websites SET get_pass = ? WHERE url = ?', (data_dict["get_pass"], row))
+
+    print("Sign in failed: ",data_dict["sign_in_failed"])
+        #sign_in_failed
+    cursor.execute('UPDATE websites SET sign_in_failed = ? WHERE url = ?', (data_dict["sign_in_failed"], row))
+
+    connection.commit()
+
+    print("Updated "+row+" password request information")
+
+    return
 
 def lookforlogin(driver):
 
@@ -24,7 +213,7 @@ def lookforlogin(driver):
         hits = driver.find_elements(By.XPATH, "//a[@href]")
     except Exception as e:
         print(f"an exception has occured, while finding nodes: {e}")
-        return False
+        return False, None
 
     # collect URLs into list links
     links=[]
@@ -40,8 +229,10 @@ def lookforlogin(driver):
     for url in links:
         if "login" in url:
             login_link = url
+            break
         elif "signin" in url:
             login_link = url
+            break
 
     
     # if a login link is found, go to the address
@@ -51,11 +242,9 @@ def lookforlogin(driver):
             driver.get(login_link)
         except Exception as e:
             print(f"The log in link failed to load: {e}")
-            return False
+            return False, None
         return True, login_link
     
-
-    """
     # in case no login link found, look for log in button, otherwise skip
     try:
         login_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Log in')]")
@@ -63,14 +252,20 @@ def lookforlogin(driver):
         return True, None
     except Exception as e:
         print(f"log in button not found: {e}")
-    """
+
+    try:
+        login_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Sign in')]")
+        login_button.click()
+        return True, None
+    except Exception as e:
+        print(f"sign in button not found: {e}")
     
-    return False
+    return False, None
 
 def parse_csp(csp_data):
     whitelists = []
     usage_unsafe_inline = None
-    use_of_wildcards = None
+    use_of_wildcards = False
     missing_object_src = None
     usage_strict_dynamic = None
     total_policy_length = 0
@@ -129,10 +324,13 @@ def parse_csp(csp_data):
             num_script_src += 1
 
             if "nonce" in val:
-                num_nonce += 1
+                num_nonce_script_src += 1
 
             if "sha256" in val or "sha384" in val or "sha512" in val:
-                num_hash += 1
+                num_hash_script_src += 1
+    else:
+        usage_strict_dynamic = False
+        usage_unsafe_inline = False
 
     if not object_src_match and not default_src_match:
         missing_object_src = True
@@ -344,7 +542,7 @@ def collect_header(driver):
         supports_upgrade = False
 
     
-
+    
     
     return csp_data, usage_unsafe_inline, use_of_wildcards, missing_object_src, frame_ancestors_values, num_frame_ancestors, safe_framing, \
             total_policy_length, num_hash, num_nonce, num_script_src, num_hash_script_src, num_nonce_script_src, usage_strict_dynamic, \
@@ -437,7 +635,7 @@ def find_next(driver):
 
     tags = ["input", "button", "span"]
     attributes = ["text()"]
-    values = ["CONTINUE", "NEXT"]
+    values = ["NEXT", "CONTINUE"]
 
     
     for tag in tags:
@@ -486,9 +684,9 @@ def find_password_input(driver):
 def find_login(driver):
     login_buttons = []
 
-    tags = ["div", "button", "input"]
+    tags = ["div", "button", "input", "ui-button"]
     attributes = ["text()", "@value"]
-    values = ["LOG IN", "SIGN IN", "LOGIN", "SIGNIN"]
+    values = ["LOG IN", "SIGN IN", "LOGIN", "SIGNIN", "SIGN-IN", "LOG-IN"]
 
     
     for tag in tags:
@@ -534,7 +732,7 @@ def attempt_login(driver, user):
         try:
             button.click()
         except Exception as e:
-            print(f"click failed: {e}")
+            print(f"next click failed: {e}")
 
         time.sleep(.13)
     
@@ -564,198 +762,11 @@ def attempt_login(driver, user):
             button.click()
             time.sleep(.12)
         except Exception as e:
-            print("click failed:", e)
+            print("login click failed:", e)
 
     return len(password_inputs)
 
-def create_db_row(url,cursor,connection):
-    
-    #look for website entries in db that have id = to current URL
-    cursor.execute("SELECT * FROM websites WHERE url = ?", (url,))
 
-    #if there is no matches, create entry
-    if cursor.fetchone() is None:
-        insertion_string = "INSERT INTO websites VALUES ('"+url+"'"
-        for attribte in db_attributes:
-            insertion_string+= ",'N/A'"
-        insertion_string +=  ")"
-        cursor.execute(insertion_string)
-        print("Added "+url+" into database")
-    #if there is, the url is already an entry in the database
-    else:
-       print(url+" already exists in table")
-    connection.commit()
-
-def add_to_db(row, data_dict, cursor, connection):
-
-    create_db_row(row, cursor, connection)
-
-    # add sso to database
-    cursor.execute('UPDATE websites SET sso_check = ? WHERE url = ?', (data_dict["sso_check"], row))
-    connection.commit()
-    print("Updated "+row+" to SSO: "+data_dict["sso_check"])
-
-
-
-    # add tls to database
-    cursor.execute('UPDATE websites SET tls_version = ? WHERE url = ?', (data_dict["tls_version"], row))
-    cursor.execute('UPDATE websites SET cipher_suite = ? WHERE url = ?', (data_dict["cipher_suite"], row))
-    cursor.execute('UPDATE websites SET certificate_authority = ? WHERE url = ?', (data_dict["certificate_authority"], row))
-    cursor.execute('UPDATE websites SET tls_error = ? WHERE url = ?', (data_dict["tls_error"], row))
-    connection.commit()
-    print("Updated "+row+" to Cipher Suite: "+data_dict["cipher_suite"] )
-    print("Updated "+row+" to TLS Version: "+data_dict["tls_version"] )
-    print("Updated "+row+" to TLS Version: "+data_dict["tls_failed"] )
-
-
-    # add response header info to database
-    print("Header collection failed: "+data_dict["header_failed"])
-        #header_failed
-    cursor.execute('UPDATE websites SET header_failed = ? WHERE url = ?', (data_dict["header_failed"], row))
-
-    print("CSP Data: "+data_dict["csp_data"])
-        #csp_data
-    cursor.execute('UPDATE websites SET csp_data = ? WHERE url = ?', (data_dict["csp_data"], row))
-
-    print("CSP Check--------------------------------------")
-
-    print("Allows inline scripts:" + data_dict["usage_unsafe_inline"])
-        #inline_script
-    cursor.execute('UPDATE websites SET usage_unsafe_inline = ? WHERE url = ?', (data_dict["usage_unsafe_inline"], row))
-
-    print("At least one directive allows wildcards:" + data_dict["use_of_wildcards"])
-        #wildcard
-    cursor.execute('UPDATE websites SET wildcard = ? WHERE url = ?', (data_dict["use_of_wildcards"], row))
-
-    print("Lacks directives for object source:" + data_dict["missing_object_src"])
-        #missing_object_src
-    cursor.execute('UPDATE websites SET missing_object_src = ? WHERE url = ?', (data_dict["missing_object_src"], row))
-
-    print("Frame ancestors data: "+data_dict["frame_ancestors_data"])
-        #frame_ancestors_data
-    cursor.execute('UPDATE websites SET frame_ancestors_data = ? WHERE url = ?', (data_dict["frame_ancestors_data"], row))
-
-    print("Number of frame ancestors:"+data_dict["num_frame_ancestors"])
-        #num_frame_ancestors
-    cursor.execute('UPDATE websites SET num_frame_ancestors = ? WHERE url = ?', (data_dict["num_frame_ancestors"], row))
-
-    print("Has safe framing policy in CSP:" + data_dict["safe_framing"])
-        #safe_framing
-    cursor.execute('UPDATE websites SET safe_framing = ? WHERE url = ?', (data_dict["safe_framing"], row))
-
-    print("Total policy length: "+data_dict["total_policy_length"])
-        #total_policy_length
-    cursor.execute('UPDATE websites SET total_policy_length = ? WHERE url = ?', (data_dict["total_policy_length"], row))
-
-    print("Total number of hashes: "+data_dict["num_hash"])
-        #num_hash
-    cursor.execute('UPDATE websites SET num_hash = ? WHERE url = ?', (data_dict["num_hash"], row))
-
-    print("Total number of nonces: "+data_dict["num_nonce"])
-        #num_nonce
-    cursor.execute('UPDATE websites SET num_nonce = ? WHERE url = ?', (data_dict["num_nonce"], row))
-
-    print("script-src number of hashes: "+data_dict["num_hash_script_src"])
-        #num_hash_script_src
-    cursor.execute('UPDATE websites SET num_hash_script_src = ? WHERE url = ?', (data_dict["num_hash_script_src"], row))
-
-    print("script-src number of nonces: "+data_dict["num_nonce_script_src"])
-        #num_nonce_script_src
-    cursor.execute('UPDATE websites SET num_nonce_script_src = ? WHERE url = ?', (data_dict["num_nonce_script_src"], row))
-
-    print("Usage of strict-dynamic: "+data_dict["usage_strict_dynamic"])
-        #usage_strict_dynamic
-    cursor.execute('UPDATE websites SET usage_strict_dynamic = ? WHERE url = ?', (data_dict["usage_strict_dynamic"], row))
-
-    print("Other security headers--------------------------")
-
-    print("Enforces HTTP Strict Transport Security:" + data_dict["supports_hsts"])
-        #hsts
-    cursor.execute('UPDATE websites SET supports_hsts = ? WHERE url = ?', (data_dict["supports_hsts"], row))
-
-    print("HSTS data: "+data_dict["hsts_data"])
-        #hsts_data
-    cursor.execute('UPDATE websites SET hsts_data = ? WHERE url = ?', (data_dict["hsts_data"], row))
-
-    print("Enforces x-frame-options:" + data_dict["supports_xframe"])
-        #supports_xframe
-    cursor.execute('UPDATE websites SET supports_xframe = ? WHERE url = ?', (data_dict["supports_xframe"], row))
-
-    print("XFO data: "+data_dict["xfo_data"])
-        #XFO_data
-    cursor.execute('UPDATE websites SET xfo_data = ? WHERE url = ?', (data_dict["xfo_data"], row))
-
-    print("x-xss-protection exists:" + data_dict["supports_xxss"])
-        #xxss
-    cursor.execute('UPDATE websites SET supports_xxss = ? WHERE url = ?', (data_dict["supports_xxss"], row))
-
-    print("x-xss data: "+data_dict["xxss_data"])
-        #xxss_data
-    cursor.execute('UPDATE websites SET xxss_data = ? WHERE url = ?', (data_dict["xxss_data"], row))
-
-    print("Has referrer policy:" + data_dict["supports_referrer_policy"])
-        #supports_referrer_policy
-    cursor.execute('UPDATE websites SET supports_referrer_policy = ? WHERE url = ?', (data_dict["supports_referrer_policy"], row))
-
-    print("Referrer policy data: "+data_dict["referrer_data"])
-        #referrer_data
-    cursor.execute('UPDATE websites SET referrer_data = ? WHERE url = ?', (data_dict["referrer_data"], row))
-
-    print("Feature policy exists:" + data_dict["supports_feature_policy"])
-        #feature_policy
-    cursor.execute('UPDATE websites SET supports_feature_policy = ? WHERE url = ?', (data_dict["supports_feature_policy"], row))
-
-    print("Feature policy data: "+data_dict["feature_data"])
-        #feature_data
-    cursor.execute('UPDATE websites SET feature_data = ? WHERE url = ?', (data_dict["feature_data"], row))
-
-    print("cspro exists: "+data_dict["supports_cspro"])
-        #supports_cspro
-    cursor.execute('UPDATE websites SET supports_cspro = ? WHERE url = ?', (data_dict["supports_cspro"], row))
-
-    print("upgrade-insecure-reuests exists: "+data_dict["supports_upgrade"])
-        #supports_upgrade
-    cursor.execute('UPDATE websites SET supports_upgrade = ? WHERE url = ?', (data_dict["supports_upgrade"], row))
-
-
-    connection.commit()
-    print("Updated "+row+" HTTP header and CSP information")
-
-    print("--HTTP Password Submission--")
-    print("Message Found: "+data_dict["message_found"])
-        #pass_message_found
-    cursor.execute('UPDATE websites SET pass_message_found = ? WHERE url = ?', (data_dict["message_found"], row))
-
-    print("Sent in Plaintext: "+data_dict["sent_in_plaintext"])
-        #pass_plaintext
-    cursor.execute('UPDATE websites SET pass_plaintext = ? WHERE url = ?', (data_dict["sent_in_plaintext"], row))
-    
-    print("Request type: "+data_dict["request_type"])
-        #pass_request_type
-    cursor.execute('UPDATE websites SET pass_request_type = ? WHERE url = ?', (data_dict["request_type"], row))
-
-    print("Found POST request: ")
-    print(f"Keywords found in POST Request URL: " +data_dict["post_pass"].url)
-    print(f"POST Request Headers:"+ data_dict["post_pass"].headers)
-    print(f"POST Request Body:" +data_dict["post_pass"].body)
-        #post_pass
-    cursor.execute('UPDATE websites SET post_pass = ? WHERE url = ?', (data_dict["post_pass"], row))
-
-    print("Found GET request: ")
-    print(f"Keywords found in GET Request URL:"+ data_dict["get_pass"].url)
-    print(f"GET Request Headers:" +data_dict["get_pass"].headers)
-        #get_pass
-    cursor.execute('UPDATE websites SET get_pass = ? WHERE url = ?', (data_dict["get_pass"], row))
-
-    print("Sign in failed: "+data_dict["sign_in_failed"])
-        #sign_in_failed
-    cursor.execute('UPDATE websites SET sign_in_failed = ? WHERE url = ?', (data_dict["sign_in_failed"], row))
-
-    connection.commit()
-
-    print("Updated "+row+" password request information")
-
-    return
 
 
 
@@ -803,7 +814,7 @@ def run_tests(row, cursor, connection):
         
         print("sign in link not found")
 
-        login_buttons = lookforlogin(driver)
+        login_buttons = find_login(driver)
         num_buttons = len(login_buttons)
 
         for button in login_buttons:
@@ -838,10 +849,6 @@ def run_tests(row, cursor, connection):
         data_dict["cipher_suite"] = cipher_suite
         data_dict["authority"] = authority
 
-        print("TLS version:" + tls_version)
-        print("Cipher suite:" + cipher_suite[0])
-        print("CA:", authority)
-
     except Exception as e:
         tls_failed = e
 
@@ -849,6 +856,7 @@ def run_tests(row, cursor, connection):
 
         print(f"TLS test failed: {e}")
 
+    
     # collect header information
     header_failed = False
     try:
@@ -859,7 +867,8 @@ def run_tests(row, cursor, connection):
     except Exception as e:
         print(f"header collection failed: {e}")
         header_failed = True
-
+    
+    
     if header_failed:
         data_dict["header_failed"] = "True"
     else:
@@ -890,33 +899,40 @@ def run_tests(row, cursor, connection):
         data_dict["feature_data"] = feature_data
         data_dict["supports_cspro"] = supports_cspro
         data_dict["supports_upgrade"] = supports_upgrade
-
+    
     # HTTP password submission
     pass_fields = None
-
+    
     message_found, request_type, sent_in_plaintext, post_pass, get_pass, post_rqs, get_rqs = None, None, None, None, None, None, None
-
+    
+    
     for user in test_users:
         pass_fields = attempt_login(driver, user)
 
         # wait for messages to be sent
-        time.sleep(5)
+        time.sleep(10)
 
     
         # look for password carrying http requests
         message_found, request_type, sent_in_plaintext, post_pass, get_pass, post_rqs, get_rqs = scrape_password_requests(driver, user)
 
         if message_found == False:
-                driver.get(login_link)
-                time.sleep(2)
+                if login_link != None:
+                    driver.get(login_link)
+                    time.sleep(2)
+                else:
+                    driver.get(cur)
+                    lookforlogin(driver)
+                    time.sleep(2)
         else:
             break
 
-
+    
     data_dict["message_found"] = message_found
-
+    
     if message_found:
         data_dict["request_type"] = request_type
+        data_dict["sent_in_plaintext"] = sent_in_plaintext
 
     if post_pass:
         data_dict["post_pass"] = post_pass
@@ -924,7 +940,7 @@ def run_tests(row, cursor, connection):
     if get_pass:
         data_dict["get_pass"] = get_pass
 
-
+    
     if not message_found or pass_fields == 0:
         signin_failed = True
     else:
@@ -934,29 +950,39 @@ def run_tests(row, cursor, connection):
     data_dict["sign_in_failed"] = signin_failed
 
     driver.quit()
-
-    print("Allows inline scripts:" + data_dict["usage_unsafe_inline"])
-    print("At least one directive allows wildcards:" + data_dict["use_of_wildcards"])
-    print("Lacks directives for object source:" + data_dict["missing_object_src"])
-    print("Total policy length: "+data_dict["total_policy_length"])
-    print("script-src number of hashes: "+data_dict["num_hash_script_src"])
-    print("script-src number of nonces: "+data_dict["num_nonce_script_src"])
-    print("Usage of strict-dynamic: "+data_dict["usage_strict_dynamic"])
-    print("Enforces HTTP Strict Transport Security:" + data_dict["supports_hsts"])
-    print("Enforces x-frame-options:" + data_dict["supports_xframe"])
-    print("XFO data: "+data_dict["xfo_data"])
-    print("x-xss-protection exists:" + data_dict["supports_xxss"])
-    print("x-xss data: "+data_dict["xxss_data"])
-    print("Message Found: "+data_dict["message_found"])
-    print("Sent in Plaintext: "+data_dict["sent_in_plaintext"])
-    print("Found POST request: ")
-    print(f"Keywords found in POST Request URL: " +data_dict["post_pass"].url)
-    print(f"POST Request Headers:"+ data_dict["post_pass"].headers)
-    print(f"POST Request Body:" +data_dict["post_pass"].body)
-    print("Found GET request: ")
-    print(f"Keywords found in GET Request URL:"+ data_dict["get_pass"].url)
-    print(f"GET Request Headers:" +data_dict["get_pass"].headers)
-    print("Sign in failed: "+data_dict["sign_in_failed"])
+    
+    try:
+        print("CSP data:" + str(data_dict["csp_data"]))
+        print("Allows inline scripts:" + str(data_dict["usage_unsafe_inline"]))
+        print("At least one directive allows wildcards:" + str(data_dict["use_of_wildcards"]))
+        print("Lacks directives for object source:" + str(data_dict["missing_object_src"]))
+        print("Total policy length: "+str(data_dict["total_policy_length"]))
+        print("script-src number of hashes: "+str(data_dict["num_hash_script_src"]))
+        print("script-src number of nonces: "+str(data_dict["num_nonce_script_src"]))
+        print("Usage of strict-dynamic: "+str(data_dict["usage_strict_dynamic"]))
+        print("Enforces HTTP Strict Transport Security:" + str(data_dict["supports_hsts"]))
+        print("Enforces x-frame-options:" + str(data_dict["supports_xframe"]))
+        print("XFO data: "+str(data_dict["xfo_data"]))
+        print("x-xss-protection exists:" + str(data_dict["supports_xxss"]))
+        print("x-xss data: "+str(data_dict["xxss_data"]))
+        print("Message Found: "+str(data_dict["message_found"]))
+        print("Sent in Plaintext: "+str(data_dict["sent_in_plaintext"]))
+        try:
+            print("Found POST request: ")
+            print(f"Keywords found in POST Request URL: " +str(data_dict["post_pass"].url))
+            print(f"POST Request Headers:"+ str(data_dict["post_pass"].headers))
+            print(f"POST Request Body:" +str(data_dict["post_pass"].body))
+        except:
+            None
+        try:
+            print("Found GET request: ")
+            print(f"Keywords found in GET Request URL:"+ str(data_dict["get_pass"].url))
+            print(f"GET Request Headers:" +str(data_dict["get_pass"].headers))
+            print("Sign in failed: "+str(data_dict["sign_in_failed"]))
+        except:
+            None
+    except Exception as e:
+        print(f"printing dictionary failed: {e}")
 
     #add_to_db(row, data_dict, cursor, connection)
 

@@ -684,7 +684,7 @@ def find_password_input(driver):
 def find_login(driver):
     login_buttons = []
 
-    tags = ["div", "button", "input", "ui-button"]
+    tags = ["div", "button", "input", "ui-button", "span"]
     attributes = ["text()", "@value"]
     values = ["LOG IN", "SIGN IN", "LOGIN", "SIGNIN", "SIGN-IN", "LOG-IN"]
 
@@ -741,30 +741,37 @@ def attempt_login(driver, user):
 
     # now on final log in screeen, look for password inputs
     password_inputs = find_password_input(driver)
-    
+    num_pass_failed = 0
     for pfield in password_inputs:
         try:
             pfield.clear()
             pfield.send_keys(password)
             break
         except:
-            print("fill failed")
+            num_pass_failed += 1
+            print("password fill failed")
         
         time.sleep(.23)
 
     
     # now on final screen log in screen, look for log in buttons
     login_buttons = find_login(driver)
-
+    num_login_failed = 0
     # try to press log in buttons
     for button in login_buttons:
         try:
             button.click()
             time.sleep(.12)
         except Exception as e:
+            num_login_failed += 1
             print("login click failed:", e)
 
-    return len(password_inputs)
+    if len(password_inputs) == num_pass_failed or len(login_buttons) == num_login_failed:
+        failed = True
+    else:
+        failed = False
+
+    return failed
 
 
 
@@ -901,13 +908,12 @@ def run_tests(row, cursor, connection):
         data_dict["supports_upgrade"] = supports_upgrade
     
     # HTTP password submission
-    pass_fields = None
-    
+    failed = None
     message_found, request_type, sent_in_plaintext, post_pass, get_pass, post_rqs, get_rqs = None, None, None, None, None, None, None
     
     
     for user in test_users:
-        pass_fields = attempt_login(driver, user)
+        failed = attempt_login(driver, user)
 
         # wait for messages to be sent
         time.sleep(10)
@@ -941,13 +947,14 @@ def run_tests(row, cursor, connection):
         data_dict["get_pass"] = get_pass
 
     
-    if not message_found or pass_fields == 0:
+    if not message_found or failed:
         signin_failed = True
     else:
         signin_failed = False
 
     
     data_dict["sign_in_failed"] = signin_failed
+    print("Sign in failed: " + str(data_dict["sign_in_failed"]))
 
     driver.quit()
     

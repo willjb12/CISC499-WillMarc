@@ -497,7 +497,7 @@ def collect_header(driver):
             total_policy_length, num_hash, num_nonce, num_script_src, num_hash_script_src, num_nonce_script_src, usage_strict_dynamic = parse_csp(csp_data)
     else:
         usage_unsafe_inline, use_of_wildcards, missing_object_src, frame_ancestors_values, num_frame_ancestors, safe_framing, \
-            num_hash, num_nonce, num_script_src, num_hash_script_src, num_nonce_script_src, usage_strict_dynamic = \
+            total_policy_length, num_hash, num_nonce, num_script_src, num_hash_script_src, num_nonce_script_src, usage_strict_dynamic = \
                 None, None, None, None, None, None, None, None, None, None, None, None, None
 
     if other_headers[0] != None:

@@ -9,10 +9,20 @@ import time
 import collecttls
 import enrollment
 
-test_users = ["testuser123@gmail.com", "david1@gmail.com", "stacey555@gmail.com", "will229@gmail.com"]
-#test_users = ["ahmet@gmail.com"]
+#test_users = ["testuser123@gmail.com", "david1@gmail.com", "stacey555@gmail.com", "will229@gmail.com"]
+test_users = ["ahmet@gmail.com"]
 
-db_attributes = ["sso_check TEXT","tls_version TEXT","cipher_suite TEXT", "certificate_authority TEXT", "tls_error TEXT", ]
+db_attributes = {"sso_check" : "NA","tls_version" : "NA", "cipher_suite" : "NA", "certificate_authority" : "NA", "tls_error" : "NA", \
+                 "header_failed" : "NA", "csp_data" : "NA", "usage_unsafe_inline" : "NA", "use_of_wildcards" : "NA", "missing_object_src" : "NA", \
+                 "frame_ancestors_data" : "NA", "num_frame_ancestors" : "NA", "safe_framing" : "NA", "total_policy_length" : "NA", \
+                 "num_hash" : "NA", "num_nonce" : "NA", "num_script_src" : "NA", "num_hash_script_src" : "NA", "num_nonce_script_src" : "NA", \
+                 "usage_strict_dynamic" : "NA", "supports_hsts" : "NA", "hsts_data" : "NA", "supports_xframe" : "NA", "xfo_data" : "NA", \
+                 "supports_xxss" : "NA", "xxss_data" : "NA", "supports_referrer_policy" : "NA", "referrer_data" : "NA", \
+                 "supports_feature_policy" : "NA", "feature_data" : "NA", "supports_cspro" : "NA", "supports_upgrade" : "NA", \
+                 "message_found" : "NA", "request_type" : "NA", "sent_in_plaintext" : "NA", "post_pass" : "NA", "get_pass" : "NA", \
+                 "sign_in_failed" : "NA"}
+
+
 
 skipped = 0
 login_found = 0
@@ -38,14 +48,14 @@ def create_db_row(url,cursor,connection):
 def add_to_db(row, data_dict, cursor, connection):
 
     create_db_row(row, cursor, connection)
-
+    for key in data_dict:
+        data_dict[key] = str(data_dict[key])
+    
     # add sso to database
     cursor.execute('UPDATE websites SET sso_check = ? WHERE url = ?', (data_dict["sso_check"], row))
     connection.commit()
+
     print("Updated "+row+" to SSO: ", data_dict["sso_check"])
-
-
-
     # add tls to database
     cursor.execute('UPDATE websites SET tls_version = ? WHERE url = ?', (data_dict["tls_version"], row))
     cursor.execute('UPDATE websites SET cipher_suite = ? WHERE url = ?', (data_dict["cipher_suite"], row))
@@ -54,11 +64,11 @@ def add_to_db(row, data_dict, cursor, connection):
     connection.commit()
     print("Updated "+row+" to Cipher Suite: ",data_dict["cipher_suite"] )
     print("Updated "+row+" to TLS Version: ",data_dict["tls_version"] )
-    print("Updated "+row+" to TLS Version: ",data_dict["tls_failed"] )
+    print("Updated "+row+" to TLS Version: ",data_dict["tls_error"] )
 
 
     # add response header info to database
-    print("Header collection failed: ",data_dict["header_failed"])
+    print("Header collection failed: ",str(data_dict["header_failed"]))
         #header_failed
     cursor.execute('UPDATE websites SET header_failed = ? WHERE url = ?', (data_dict["header_failed"], row))
 
@@ -72,9 +82,9 @@ def add_to_db(row, data_dict, cursor, connection):
         #inline_script
     cursor.execute('UPDATE websites SET usage_unsafe_inline = ? WHERE url = ?', (data_dict["usage_unsafe_inline"], row))
 
-    print("At least one directive allows wildcards:", data_dict["use_of_wildcards"])
+    print("At least one directive allows use_of_wildcards:", data_dict["use_of_wildcards"])
         #wildcard
-    cursor.execute('UPDATE websites SET wildcard = ? WHERE url = ?', (data_dict["use_of_wildcards"], row))
+    cursor.execute('UPDATE websites SET use_of_wildcards = ? WHERE url = ?', (data_dict["use_of_wildcards"], row))
 
     print("Lacks directives for object source:", data_dict["missing_object_src"])
         #missing_object_src
@@ -173,26 +183,26 @@ def add_to_db(row, data_dict, cursor, connection):
     print("--HTTP Password Submission--")
     print("Message Found: ",data_dict["message_found"])
         #pass_message_found
-    cursor.execute('UPDATE websites SET pass_message_found = ? WHERE url = ?', (data_dict["message_found"], row))
+    cursor.execute('UPDATE websites SET message_found = ? WHERE url = ?', (data_dict["message_found"], row))
 
     print("Sent in Plaintext: ",data_dict["sent_in_plaintext"])
         #pass_plaintext
-    cursor.execute('UPDATE websites SET pass_plaintext = ? WHERE url = ?', (data_dict["sent_in_plaintext"], row))
+    cursor.execute('UPDATE websites SET sent_in_plaintext = ? WHERE url = ?', (data_dict["sent_in_plaintext"], row))
     
     print("Request type: ",data_dict["request_type"])
         #pass_request_type
-    cursor.execute('UPDATE websites SET pass_request_type = ? WHERE url = ?', (data_dict["request_type"], row))
+    cursor.execute('UPDATE websites SET request_type = ? WHERE url = ?', (data_dict["request_type"], row))
 
     print("Found POST request: ")
-    print(f"Keywords found in POST Request URL: ",data_dict["post_pass"].url)
-    print(f"POST Request Headers:", data_dict["post_pass"].headers)
-    print(f"POST Request Body:" ,data_dict["post_pass"].body)
+    #print(f"Keywords found in POST Request URL: ",data_dict["post_pass"].url)
+    #print(f"POST Request Headers:", data_dict["post_pass"].headers)
+    print(f"POST Request Body:" ,data_dict["post_pass"])
         #post_pass
     cursor.execute('UPDATE websites SET post_pass = ? WHERE url = ?', (data_dict["post_pass"], row))
 
     print("Found GET request: ")
-    print(f"Keywords found in GET Request URL:", data_dict["get_pass"].url)
-    print(f"GET Request Headers:",data_dict["get_pass"].headers)
+    print(f"Keywords found in GET Request URL:", data_dict["get_pass"])
+    #print(f"GET Request Headers:",data_dict["get_pass"].headers)
         #get_pass
     cursor.execute('UPDATE websites SET get_pass = ? WHERE url = ?', (data_dict["get_pass"], row))
 
@@ -550,6 +560,7 @@ def collect_header(driver):
               supports_referrer_policy, referrer_data, supports_feature_policy, feature_data, supports_cspro, supports_upgrade
 
 def scrape_password_requests(driver, email):
+    email = email.split("@")[0]
     requests = driver.requests
     password = "WillMarc5567"
    
@@ -853,7 +864,7 @@ def run_tests(row, cursor, connection):
         tls_version, cipher_suite, authority = collecttls.get_tls_info(cur)
 
         data_dict["tls_version"] = tls_version
-        data_dict["cipher_suite"] = cipher_suite
+        data_dict["cipher_suite"] = cipher_suite[0]
         data_dict["authority"] = authority
 
     except Exception as e:
@@ -941,10 +952,10 @@ def run_tests(row, cursor, connection):
         data_dict["sent_in_plaintext"] = sent_in_plaintext
 
     if post_pass:
-        data_dict["post_pass"] = post_pass
+        data_dict["post_pass"] = post_pass.body
     
     if get_pass:
-        data_dict["get_pass"] = get_pass
+        data_dict["get_pass"] = get_pass.url
 
     
     if not message_found or failed:
@@ -958,53 +969,49 @@ def run_tests(row, cursor, connection):
 
     driver.quit()
     
-    try:
-        print("CSP data:" + str(data_dict["csp_data"]))
-        print("Allows inline scripts:" + str(data_dict["usage_unsafe_inline"]))
-        print("At least one directive allows wildcards:" + str(data_dict["use_of_wildcards"]))
-        print("Lacks directives for object source:" + str(data_dict["missing_object_src"]))
-        print("Total policy length: "+str(data_dict["total_policy_length"]))
-        print("script-src number of hashes: "+str(data_dict["num_hash_script_src"]))
-        print("script-src number of nonces: "+str(data_dict["num_nonce_script_src"]))
-        print("Usage of strict-dynamic: "+str(data_dict["usage_strict_dynamic"]))
-        print("Enforces HTTP Strict Transport Security:" + str(data_dict["supports_hsts"]))
-        print("Enforces x-frame-options:" + str(data_dict["supports_xframe"]))
-        print("XFO data: "+str(data_dict["xfo_data"]))
-        print("x-xss-protection exists:" + str(data_dict["supports_xxss"]))
-        print("x-xss data: "+str(data_dict["xxss_data"]))
-        print("Message Found: "+str(data_dict["message_found"]))
-        print("Sent in Plaintext: "+str(data_dict["sent_in_plaintext"]))
-        try:
-            print("Found POST request: ")
-            print(f"Keywords found in POST Request URL: " +str(data_dict["post_pass"].url))
-            print(f"POST Request Headers:"+ str(data_dict["post_pass"].headers))
-            print(f"POST Request Body:" +str(data_dict["post_pass"].body))
-        except:
-            None
-        try:
-            print("Found GET request: ")
-            print(f"Keywords found in GET Request URL:"+ str(data_dict["get_pass"].url))
-            print(f"GET Request Headers:" +str(data_dict["get_pass"].headers))
-            print("Sign in failed: "+str(data_dict["sign_in_failed"]))
-        except:
-            None
-    except Exception as e:
-        print(f"printing dictionary failed: {e}")
+    # try:
+    #     print("CSP data:" + str(data_dict["csp_data"]))
+    #     print("Allows inline scripts:" + str(data_dict["usage_unsafe_inline"]))
+    #     print("At least one directive allows wildcards:" + str(data_dict["use_of_wildcards"]))
+    #     print("Lacks directives for object source:" + str(data_dict["missing_object_src"]))
+    #     print("Total policy length: "+str(data_dict["total_policy_length"]))
+    #     print("script-src number of hashes: "+str(data_dict["num_hash_script_src"]))
+    #     print("script-src number of nonces: "+str(data_dict["num_nonce_script_src"]))
+    #     print("Usage of strict-dynamic: "+str(data_dict["usage_strict_dynamic"]))
+    #     print("Enforces HTTP Strict Transport Security:" + str(data_dict["supports_hsts"]))
+    #     print("Enforces x-frame-options:" + str(data_dict["supports_xframe"]))
+    #     print("XFO data: "+str(data_dict["xfo_data"]))
+    #     print("x-xss-protection exists:" + str(data_dict["supports_xxss"]))
+    #     print("x-xss data: "+str(data_dict["xxss_data"]))
+    #     print("Message Found: "+str(data_dict["message_found"]))
+    #     print("Sent in Plaintext: "+str(data_dict["sent_in_plaintext"]))
+    #     try:
+    #         print("Found POST request: ")
+    #         print(f"Keywords found in POST Request URL: " +str(data_dict["post_pass"].url))
+    #         print(f"POST Request Headers:"+ str(data_dict["post_pass"].headers))
+    #         print(f"POST Request Body:" +str(data_dict["post_pass"].body))
+    #     except:
+    #         None
+    #     try:
+    #         print("Found GET request: ")
+    #         print(f"Keywords found in GET Request URL:"+ str(data_dict["get_pass"].url))
+    #         print(f"GET Request Headers:" +str(data_dict["get_pass"].headers))
+    #         print("Sign in failed: "+str(data_dict["sign_in_failed"]))
+    #     except:
+    #         None
+    # except Exception as e:
+    #     print(f"printing dictionary failed: {e}")
 
-    #add_to_db(row, data_dict, cursor, connection)
+    
+
+    add_to_db(row, data_dict, cursor, connection)
+
+
 
     
     
     
     
-
-
-
-
-
-
-
-
 
 
 
@@ -1027,12 +1034,12 @@ def auto_collect():
         lineread = csv.reader(file, delimiter = ',')
 
         cwd = os.getcwd()
-        connection = sqlite3.connect(cwd+"/db/test2.db")
+        connection = sqlite3.connect(cwd+"/db/test3.db")
         cursor = connection.cursor()
 
         creation_string =("CREATE TABLE IF NOT EXISTS websites (url TEXT PRIMARY KEY")
         for entry in db_attributes:
-            creation_string+=(", "+entry)
+            creation_string+=(", "+entry+" TEXT")
         
         creation_string+=");"
         cursor.execute(creation_string)
@@ -1049,4 +1056,8 @@ def auto_collect():
             else:
                 break
 
+
+    
 auto_collect()
+
+

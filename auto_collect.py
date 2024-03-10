@@ -9,8 +9,7 @@ import time
 import collecttls
 import enrollment
 
-#test_users = ["testuser123@gmail.com", "david1@gmail.com", "stacey555@gmail.com", "will229@gmail.com"]
-test_users = ["ahmet@gmail.com"]
+test_users = ["testuser1@gmail.com", "will229@gmail.com", "michael"]
 
 db_attributes = {"sso_check" : "NA","tls_version" : "NA", "cipher_suite" : "NA", "certificate_authority" : "NA", "tls_error" : "NA", \
                  "header_failed" : "NA", "csp_data" : "NA", "usage_unsafe_inline" : "NA", "use_of_wildcards" : "NA", "missing_object_src" : "NA", \
@@ -968,39 +967,6 @@ def run_tests(row, cursor, connection):
     print("Sign in failed: " + str(data_dict["sign_in_failed"]))
 
     driver.quit()
-    
-    # try:
-    #     print("CSP data:" + str(data_dict["csp_data"]))
-    #     print("Allows inline scripts:" + str(data_dict["usage_unsafe_inline"]))
-    #     print("At least one directive allows wildcards:" + str(data_dict["use_of_wildcards"]))
-    #     print("Lacks directives for object source:" + str(data_dict["missing_object_src"]))
-    #     print("Total policy length: "+str(data_dict["total_policy_length"]))
-    #     print("script-src number of hashes: "+str(data_dict["num_hash_script_src"]))
-    #     print("script-src number of nonces: "+str(data_dict["num_nonce_script_src"]))
-    #     print("Usage of strict-dynamic: "+str(data_dict["usage_strict_dynamic"]))
-    #     print("Enforces HTTP Strict Transport Security:" + str(data_dict["supports_hsts"]))
-    #     print("Enforces x-frame-options:" + str(data_dict["supports_xframe"]))
-    #     print("XFO data: "+str(data_dict["xfo_data"]))
-    #     print("x-xss-protection exists:" + str(data_dict["supports_xxss"]))
-    #     print("x-xss data: "+str(data_dict["xxss_data"]))
-    #     print("Message Found: "+str(data_dict["message_found"]))
-    #     print("Sent in Plaintext: "+str(data_dict["sent_in_plaintext"]))
-    #     try:
-    #         print("Found POST request: ")
-    #         print(f"Keywords found in POST Request URL: " +str(data_dict["post_pass"].url))
-    #         print(f"POST Request Headers:"+ str(data_dict["post_pass"].headers))
-    #         print(f"POST Request Body:" +str(data_dict["post_pass"].body))
-    #     except:
-    #         None
-    #     try:
-    #         print("Found GET request: ")
-    #         print(f"Keywords found in GET Request URL:"+ str(data_dict["get_pass"].url))
-    #         print(f"GET Request Headers:" +str(data_dict["get_pass"].headers))
-    #         print("Sign in failed: "+str(data_dict["sign_in_failed"]))
-    #     except:
-    #         None
-    # except Exception as e:
-    #     print(f"printing dictionary failed: {e}")
 
     
 
@@ -1034,7 +1000,7 @@ def auto_collect():
         lineread = csv.reader(file, delimiter = ',')
 
         cwd = os.getcwd()
-        connection = sqlite3.connect(cwd+"/db/test3.db")
+        connection = sqlite3.connect(cwd+"/db/websiteinfo.db")
         cursor = connection.cursor()
 
         creation_string =("CREATE TABLE IF NOT EXISTS websites (url TEXT PRIMARY KEY")
@@ -1058,6 +1024,5 @@ def auto_collect():
 
 
     
-auto_collect()
 
 

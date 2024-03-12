@@ -1023,6 +1023,6 @@ def auto_collect():
                 break
 
 
-    
+auto_collect()
 
 

@@ -1012,7 +1012,7 @@ def auto_collect():
         connection.commit()
         
         ct = 0
-        rows = 500
+        rows = 1500
         for row in lineread:
             if ct < rows:
                 try:

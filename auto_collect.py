@@ -9,7 +9,7 @@ import time
 import collecttls
 import enrollment
 
-test_users = ["testuser1@gmail.com", "will229@gmail.com", "michael"]
+test_users = ["testuser1@gmail.com", "will229@yahoo.com", "michael"]
 
 db_attributes = {"sso_check" : "NA","tls_version" : "NA", "cipher_suite" : "NA", "certificate_authority" : "NA", "tls_error" : "NA", \
                  "header_failed" : "NA", "csp_data" : "NA", "usage_unsafe_inline" : "NA", "use_of_wildcards" : "NA", "missing_object_src" : "NA", \
@@ -825,7 +825,7 @@ def run_tests(row, cursor, connection):
     found, login_link = lookforlogin(driver)
 
     time.sleep(3)
-
+    nologin = False
     # in case login links not found, skip
     if not found:
         
@@ -846,8 +846,7 @@ def run_tests(row, cursor, connection):
         if num_buttons == 0:
             # Add mode for manual here
             print("log in button not found")
-            driver.quit()
-            return
+            nologin = True
     else:
         login_found += 1
         
@@ -916,6 +915,12 @@ def run_tests(row, cursor, connection):
         data_dict["feature_data"] = feature_data
         data_dict["supports_cspro"] = supports_cspro
         data_dict["supports_upgrade"] = supports_upgrade
+
+    if nologin:
+        driver.quit()
+        data_dict["sign_in_failed"] = "True"
+        add_to_db(row, data_dict, cursor, connection)
+        return
     
     # HTTP password submission
     failed = None

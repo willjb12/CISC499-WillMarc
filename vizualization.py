@@ -393,13 +393,13 @@ def make_values_by_row():
             values_by_row.append(entries)
             ordered_urls.append(row['url'])
 
-    return values_by_row
+    return (values_by_row, ordered_urls)
 
 
 # domains_by_row is a list of lists of just the domains whitelisted in the policies
 def make_domains_by_row(values_by_row):
 
-    domains_by_row = values_by_row
+    domains_by_row = values_by_row[0]
 
     for domains in domains_by_row:
         i = 0
@@ -436,7 +436,7 @@ def make_script_src_by_row():
     ordered_urls = []
 
     for row in db_list:
-        if row["header_failed"] != True and row['csp_data'] != 'None':
+        if row["header_failed"] != 'True' and row['csp_data'] != 'None':
             match = script_src_regex.search(row["csp_data"])
 
             if not match:
@@ -504,7 +504,7 @@ def parse_for_strict_dynamic():
     for domains in script_src_domains:
         script_src_length.append(len(domains))
 
-    return strict_dynamic_usage, unsafe_inline_usage, nonce_usage, hash_usage, script_src_length
+    return strict_dynamic_usage, unsafe_inline_usage, nonce_usage, hash_usage, script_src_length, (script_src_by_row, ordered_urls)
 
 def graph_common_allows():
     domains_by_row = make_domains_by_row(make_values_by_row())
@@ -545,7 +545,7 @@ def graph_common_allows():
     plt.show()
 
 def graph_strict_dynamic():
-    strict_dynamic_usage, unsafe_inline_usage, nonce_usage, hash_usage, script_src_length = parse_for_strict_dynamic()
+    strict_dynamic_usage, unsafe_inline_usage, nonce_usage, hash_usage, script_src_length, _ = parse_for_strict_dynamic()
 
     num_csp = 0
     for row in db_list:
@@ -640,8 +640,117 @@ def graph_strict_dynamic():
     plt.show()
 
 
+
 #graph_strict_dynamic()
 
+def graph_total_length():
+    length = []
+    for row in db_list:
+        length.append(row['total_policy_length'])
+
+
         
+def csp_score():
+    score = []
+    length_pol = []
+    strength_csp = []
+    strength_framing = []
+    url = []
+    
+    for row in db_list:
+        url.append(row['url'])
+        
+        
+        script_src = None
+        default_src = None
+        
+
+        pos = len(score)
+
+        if row['header_failed'] != 'True' and row['csp_data'] != 'None' and row['csp_data'] != 'NA':
+            strong_csp = True
+            strong_framing = True
+            length_pol.append(int(row['total_policy_length']) + 1)
+            score.append(60)
+            script_src_pattern = r"script-src\s+([^;]+);"
+            script_src_regex = re.compile(script_src_pattern)
+            single_pattern = r"script-src\s+([^;]+)"
+            single_regex = re.compile(single_pattern)
+
+            csp_data = row['csp_data']
+
+            match = script_src_regex.search(csp_data)
+
+            if not match:
+                match = single_regex.search(csp_data)
+
+            if match:
+                script_src = match.group(1)
+                script_src = script_src.replace("'", "")
+                script_src = script_src.split()
+                
+
+            if not match:
+                default_src_pattern = r"default-src\s+([^;]+);"
+                default_src_regex = re.compile(default_src_pattern)
+                def_single_pattern = r"default-src\s+([^;]+)"
+                def_single_regex = re.compile(def_single_pattern) 
+
+                match = default_src_regex.search(csp_data)
+
+                if not match:
+                    match = def_single_regex.search(csp_data)
+
+                if match:
+                    default_src = match.group(1)
+                    default_src = default_src.replace("'", "")
+
+
+
+            if script_src == None:
+                if default_src != None:
+                    if "unsafe-inline" in default_src:
+                        strong_csp = False
+                        score[pos] -= 20
+            else:
+                if row['usage_unsafe_inline'] == 'True' and row['num_hash_script_src'] == 0 and row['num_nonce_script_src'] == 0:
+                    strong_csp = False
+                    score[pos] -= 20
+
+            if row['use_of_wildcards'] == 'True':
+                strong_csp == False
+                score[pos] -= 20
+
+            if row['missing_object_src'] == 'True':
+                strong_csp = False
+                score[pos] -= 20
+
+            bad_ancestors = ["http:", "https:", "blob:", "data:", "filesystem:", "mediastream:", "wss:", "ws:", "*"]
+
+              
+            score[pos] += 10
+            for bad in bad_ancestors:
+                if bad in row['frame_ancestors_data']:
+                    score[pos] -= 10
+                    strong_framing = False
+
+            strength_csp.append(strong_csp)
+            strength_framing.append(strong_framing)
+
+            if row['supports_upgrade'] == "True":
+                score[pos] += 10
+        else:
+            score.append(0)
+            strength_csp.append(False)
+            strength_framing.append(False)
+            length_pol.append(None)
+
+        return score, url, length_pol, strength_csp, strength_framing
+
+    
+
+    
+        
+
 
 

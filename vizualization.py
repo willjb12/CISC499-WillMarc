@@ -101,6 +101,95 @@ def csp_directive_distribution(db_list):
 
 #csp_directive_distribution(db_list)
     
+def xxss_check(dict_row):
+
+    if(dict_row['supports_xxss'] == 'False'):
+        return 0
+    elif(('1' in dict_row['xxss_data']) and ('block' in dict_row['xxss_data'])):
+        return 15
+        #best
+    elif(('1' in dict_row['xxss_data']) and ('block' not in dict_row['xxss_data'])):
+        return 12
+        #better
+    elif(row['xxss_data'] == '0' or dict_row['xxss_data'] == 'None' or dict_row['xxss_data'] == '' or dict_row['xxss_data'] == 'NA'):
+        return 0
+        #bad
+    else:
+        return 0
+    
+# for row in db_list: 
+#     print("XXSS: "+row['supports_xxss']+', '+row['xxss_data']+', Number: '+str(xxss_check(row))+'\n')
+
+
+def xfo_check(dict_row):
+    
+
+    if dict_row['supports_xframe'] == 'False':
+        return 0
+    elif dict_row['xfo_data'].upper() == 'DENY':
+        return 15
+    elif dict_row['xfo_data'].upper() == 'SAMEORIGIN':
+        return 15
+    elif dict_row['xfo_data'].upper() == 'ALLOWALL' or 'ALLOW-FROM' in dict_row['xfo_data'].upper():
+        return 0    
+    else:
+        return 0
+
+# for row in db_list: 
+#     print("XFO: "+row['supports_xframe']+', '+row['xfo_data']+', Number: '+str(xfo_check(row))+'\n')
+    
+def hsts_check(dict_row):
+
+
+    if dict_row['supports_hsts'] == 'False':
+        return 0
+    elif 'max-age=0' in dict_row['hsts_data']:
+        return 0
+    elif 'max-age' in dict_row['hsts_data']:
+        return 15
+    else:
+        return 0
+
+
+# for row in db_list: 
+#     print("HSTS: "+row['supports_hsts']+', '+row['hsts_data']+', Number: '+str(hsts_check(row))+'\n')
+    
+def referrer_check(dict_row):
+    options = dict_row['referrer_data'].split(',')
+
+    if dict_row['supports_referrer_policy'] == 'False':
+        return 0
+    
+    elif 'unsafe-url' in options:
+        
+        return 0
+    elif 'no-referrer-when-downgrade' in options:
+        
+        return 0
+    elif 'origin' in options:
+        
+        return 5
+    elif 'origin-when-cross-origin' in options:
+        
+        return 5
+    elif 'strict-origin' in options:
+        
+        return 5
+    elif 'strict-origin-when-cross-origin' in options:
+        
+        return 5
+    elif 'no-referrer'in options:
+        
+        return 10
+    elif 'same-origin' in options:
+
+        return 10
+    else:
+        return 0
+
+# for row in db_list: 
+#     print("ref: "+row['supports_referrer_policy']+', '+row['referrer_data']+', Number: '+str(referrer_check(row))+'\n')
+    
 
 def common_features_script_src(db_list):
     used_features = {}
@@ -551,7 +640,7 @@ def graph_strict_dynamic():
     plt.show()
 
 
-graph_strict_dynamic()
+#graph_strict_dynamic()
 
         
 

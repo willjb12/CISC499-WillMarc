@@ -774,11 +774,13 @@ def grading_function():
     length_pol = ret[2]
     strength_csp = ret[3]
     strengt_framing = ret[4]
+    grades = []
     for i, thing in enumerate(score,0):
         grade_score = grade((thing/115)*100)
         print(url[i]+ " "+grade_score+" "+str( round( (thing/115)*100,2 ) ) )
+        grades.append(grade_score)
 
-    
+    return url, grades
 
 grading_function()
         

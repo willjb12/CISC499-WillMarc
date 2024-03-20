@@ -153,7 +153,7 @@ def hsts_check(dict_row):
 
 # for row in db_list: 
 #     print("HSTS: "+row['supports_hsts']+', '+row['hsts_data']+', Number: '+str(hsts_check(row))+'\n')
-    
+
 def referrer_check(dict_row):
     options = dict_row['referrer_data'].split(',')
 
@@ -745,12 +745,42 @@ def csp_score():
             strength_framing.append(False)
             length_pol.append(None)
 
-        return score, url, length_pol, strength_csp, strength_framing
+        score[pos]+=referrer_check(row)
+        score[pos]+=hsts_check(row)
+        if strength_csp == False:
+            score[pos]+=xxss_check(row)
+        if strength_framing == False:
+            score[pos]+=xfo_check(row)
 
+    return score, url, length_pol, strength_csp, strength_framing
+
+def grade(g):
+    if (g>=90):
+        return "A"
+    elif (80<g<90):
+        return "B"
+    elif (70<=g<80):
+        return "C"
+    elif (60<=g<70):
+        return "D"
+    elif (g<60):
+        return "F"
     
 
-    
+def grading_function():
+    ret = csp_score()
+    score = ret[0]
+    url = ret[1]
+    length_pol = ret[2]
+    strength_csp = ret[3]
+    strengt_framing = ret[4]
+    grades = []
+    for i, thing in enumerate(score,0):
+        grade_score = grade((thing/115)*100)
+        print(url[i]+ " "+grade_score+" "+str( round( (thing/115)*100,2 ) ) )
+        grades.append(grade_score)
+
+    return url, grades
+
+grading_function()
         
-
-
-

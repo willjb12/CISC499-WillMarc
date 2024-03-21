@@ -146,7 +146,7 @@ def hsts_check(dict_row):
     elif 'max-age=0' in dict_row['hsts_data']:
         return 0, "hsts max age 0"
     elif 'max-age' in dict_row['hsts_data']:
-        return 15, "hsts good"
+        return 20, "hsts good"
     else:
         return 0, "unknown hsts"
 
@@ -732,10 +732,10 @@ def csp_score():
             bad_ancestors = ["http:", "https:", "blob:", "data:", "filesystem:", "mediastream:", "wss:", "ws:", "*"]
 
               
-            score[pos] += 10
+            score[pos] += 15
             for bad in bad_ancestors:
                 if bad in row['frame_ancestors_data']:
-                    score[pos] -= 10
+                    score[pos] -= 15
                     descs[pos] = descs[pos]+ " bad ancestors,"
                     strong_framing = False
 
@@ -743,7 +743,9 @@ def csp_score():
             strength_framing.append(strong_framing)
 
             if row['supports_upgrade'] == "True":
+                print('MELVIN')
                 score[pos] += 10
+                descs[pos] = descs[pos]+ "supports upgrade,"
         else:
             score.append(0)
             strength_csp.append(False)
@@ -792,9 +794,9 @@ def grading_function():
 
         grades.append(grade_score)
         ret_dict[url[i]+ " "+grade_score] = percent
-        if percent > 82:
+        # if percent > 91:
 
-            print(url[i]+" "+str(percent)+" "+grade_score+descs[i])
+        #     print(url[i]+" "+str(percent)+" "+grade_score+descs[i])
 
     return ret_dict, url, grades
 
@@ -842,4 +844,4 @@ def grade_distribution():
 
     plt.show()
 
-#grade_distribution()
+grade_distribution()

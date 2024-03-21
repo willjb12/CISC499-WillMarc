@@ -146,7 +146,7 @@ def hsts_check(dict_row):
     elif 'max-age=0' in dict_row['hsts_data']:
         return 0, "hsts max age 0"
     elif 'max-age' in dict_row['hsts_data']:
-        return 15, "hsts good"
+        return 20, "hsts good"
     else:
         return 0, "unknown hsts"
 
@@ -732,10 +732,10 @@ def csp_score():
             bad_ancestors = ["http:", "https:", "blob:", "data:", "filesystem:", "mediastream:", "wss:", "ws:", "*"]
 
               
-            score[pos] += 10
+            score[pos] += 15
             for bad in bad_ancestors:
                 if bad in row['frame_ancestors_data']:
-                    score[pos] -= 10
+                    score[pos] -= 15
                     descs[pos] = descs[pos]+ " bad ancestors,"
                     strong_framing = False
 
@@ -743,7 +743,9 @@ def csp_score():
             strength_framing.append(strong_framing)
 
             if row['supports_upgrade'] == "True":
+                print('MELVIN')
                 score[pos] += 10
+                descs[pos] = descs[pos]+ "supports upgrade,"
         else:
             score.append(0)
             strength_csp.append(False)
@@ -764,15 +766,15 @@ def csp_score():
     return score, url, length_pol, strength_csp, strength_framing, descs
 
 def grade(g):
-    if (g>=90):
+    if (g>=85):
         return "A"
-    elif (80<g<90):
+    elif (70<=g<85):
         return "B"
-    elif (70<=g<80):
-        return "C"
     elif (60<=g<70):
+        return "C"
+    elif (50<=g<60):
         return "D"
-    elif (g<60):
+    elif (g<50):
         return "F"
     
 
@@ -792,8 +794,54 @@ def grading_function():
 
         grades.append(grade_score)
         ret_dict[url[i]+ " "+grade_score] = percent
-        print(url[i]+" "+str(percent)+" "+grade_score+descs[i])
+        # if percent > 91:
+
+        #     print(url[i]+" "+str(percent)+" "+grade_score+descs[i])
 
     return ret_dict, url, grades
 
 grading_function()
+
+
+def grade_distribution():
+    grades = grading_function()[2]
+    grade_counts = {grade: grades.count(grade) for grade in "ABCDF"}
+
+    # Data for plotting
+    grades_ordered = ["A", "B", "C", "D", "F"]
+    counts = [grade_counts.get(grade, 0) for grade in grades_ordered]
+
+    # Grade ranges for annotation
+    grade_ranges = {
+        "A": "85-100",
+        "B": "70-84",
+        "C": "60-69",
+        "D": "50-59",
+        "F": "<50"
+    }
+
+    # Create histogram
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(grades_ordered, counts, color='skyblue')
+
+    plt.xlabel('Grades')
+    plt.ylabel('Frequency')
+    plt.title('Frequency of Letter Grades')
+    plt.xticks(grades_ordered)
+
+    # Determine the range for y-ticks
+    max_count = max(counts)
+    y_tick_max = (max_count // 50 + 1) * 50  # Round up to the nearest 50
+    y_ticks = np.arange(0, y_tick_max, 50)  # Generate y-ticks at intervals of 50
+
+    plt.yticks(y_ticks)
+
+    # Annotate each bar with the grade range
+    for bar, grade in zip(bars, grades_ordered):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2., height,
+                f'{grade_ranges[grade]}', ha='center', va='bottom')
+
+    plt.show()
+
+grade_distribution()

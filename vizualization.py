@@ -165,7 +165,7 @@ def referrer_check(dict_row):
         return 0, "ref_pol unsafe-url"
     elif 'no-referrer-when-downgrade' in options:
         
-        return 0, "ref_pol uno-referrer-when-downgrade"
+        return 0, "ref_pol no-referrer-when-downgrade"
     elif 'origin' in options:
         
         return 5, "ref_pol origin"
@@ -742,8 +742,7 @@ def csp_score():
             strength_csp.append(strong_csp)
             strength_framing.append(strong_framing)
 
-            if row['supports_upgrade'] == "True":
-                print('MELVIN')
+            if 'upgrade-insecure-requests' in row['csp_data']:
                 score[pos] += 10
                 descs[pos] = descs[pos]+ "supports upgrade,"
         else:
@@ -794,9 +793,6 @@ def grading_function():
 
         grades.append(grade_score)
         ret_dict[url[i]+ " "+grade_score] = percent
-        # if percent > 91:
-
-        #     print(url[i]+" "+str(percent)+" "+grade_score+descs[i])
 
     return ret_dict, url, grades
 
@@ -845,3 +841,6 @@ def grade_distribution():
     plt.show()
 
 grade_distribution()
+# for row in db_list:
+#     if 'upgrade-insecure-requests' in row['csp_data']:
+#         print(row['url']+" "+row['csp_data']+'\n')

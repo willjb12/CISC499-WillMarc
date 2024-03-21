@@ -5,6 +5,7 @@ import re
 import matplotlib.pyplot as plt
 from collections import Counter
 import numpy as np
+import pandas as pd
 
 cwd = os.getcwd()
 connection = sqlite3.connect(cwd+"/db/websiteinfo.db")
@@ -425,6 +426,60 @@ def make_domains_by_row(values_by_row):
 
     return domains_by_row
 
+def get_full_csp():
+    report_pattern1 = r"report-uri\s+[^;]*;"
+    report_pattern2 = r"report-uri\s+([^;]+)$"
+
+    values_by_row = []
+    ordered_urls = []
+    for row in db_list:
+        if row["header_failed"] != True and row['csp_data'] != 'None':
+            csp_data = re.sub(report_pattern1, '', row['csp_data'])
+            csp_data = re.sub(report_pattern2, '', csp_data)
+
+            values_by_row.append(csp_data)
+            ordered_urls.append(row['url'])
+        else:
+            values_by_row.append(None)
+            ordered_urls.append(row['url'])
+
+    return values_by_row, ordered_urls
+
+def get_vals_by_row_all():
+    report_pattern1 = r"report-uri\s+[^;]*;"
+    report_pattern2 = r"report-uri\s+([^;]+)$"
+
+    full_pattern = r"\b(?:[a-zA-Z0-9-]+-(?:src|ancestors|action|uri))\s+([^;]+)"
+    full_regex = re.compile(full_pattern)
+
+    single_pattern = r"'([^']+)'"
+    single_regex = re.compile(single_pattern)
+
+    values_by_row = []
+    ordered_urls = []
+    for row in db_list:
+        if row["header_failed"] != True and row['csp_data'] != 'None':
+            csp_data = re.sub(report_pattern1, '', row['csp_data'])
+            csp_data = re.sub(report_pattern2, '', csp_data)
+            matches = full_regex.findall(csp_data)
+            
+            if matches == []:
+                matches = single_regex.findall(csp_data)
+
+            entries = []
+            for vals in matches:
+                entries = entries + vals.split(' ')
+
+            
+
+            values_by_row.append(entries)
+            ordered_urls.append(row['url'])
+        else:
+            values_by_row.append(None)
+            ordered_urls.append(row['url'])
+
+    return (values_by_row, ordered_urls)
+
 def make_script_src_by_row():
     script_src_pattern = r"script-src\s+([^;]+);"
     script_src_regex = re.compile(script_src_pattern)
@@ -709,40 +764,48 @@ def csp_score():
                     default_src = default_src.replace("'", "")
 
 
-
-            if script_src == None:
-                if default_src != None:
+            if row['usage_unsafe_inline'] == 'True' and row['num_hash_script_src'] == '0' and row['num_nonce_script_src'] == '0':
+                strong_csp = False
+                score[pos] -= 20
+                descs[pos] = descs[pos]+ " has weak csp,"
+            else:
+                if script_src == None and default_src != None:
                     if "unsafe-inline" in default_src:
                         strong_csp = False
                         score[pos] -= 20
                         descs[pos] = descs[pos]+ " has unsafe-inline in default_src,"
-            else:
-                if row['usage_unsafe_inline'] == 'True' and row['num_hash_script_src'] == 0 and row['num_nonce_script_src'] == 0:
-                    strong_csp = False
-                    score[pos] -= 20
-                    descs[pos] = descs[pos]+ " has weak csp,"
             if row['use_of_wildcards'] == 'True':
                 strong_csp == False
                 score[pos] -= 20
                 descs[pos] = descs[pos]+ " has wildcards,"
+            elif default_src != None:
+                if "https:" in default_src or "http:" in default_src:
+                    strong_csp =False
+                    score[pos] -= 20
+                    descs[pos] = descs[pos] + " has scheme,"
+            elif script_src != None:
+                if "https:" in script_src or "http:" in script_src and row['usage_strict_dynamic'] == 'False':
+                    strong_csp =False
+                    score[pos] -= 20
+                    descs[pos] = descs[pos] + " has scheme,"
             if row['missing_object_src'] == 'True':
                 strong_csp = False
                 score[pos] -= 20
                 descs[pos] = descs[pos]+ " missing object-src,"
-            bad_ancestors = ["http:", "https:", "blob:", "data:", "filesystem:", "mediastream:", "wss:", "ws:", "*"]
 
-              
+            bad_ancestors = ["http:", "https:", "blob:", "data:", "filesystem:", "mediastream:", "wss:", "ws:", "*", "'*'"]
+
             score[pos] += 15
             for bad in bad_ancestors:
-                if bad in row['frame_ancestors_data']:
+                if bad == row['frame_ancestors_data'].split():
                     score[pos] -= 15
                     descs[pos] = descs[pos]+ " bad ancestors,"
-                    strong_framing = False
+                    break
 
             strength_csp.append(strong_csp)
             strength_framing.append(strong_framing)
 
-            if 'upgrade-insecure-requests' in row['csp_data']:
+            if 'upgrade-insecure-requests' in row['csp_data'] or 'block-all-mixed-conent' in row['csp_data']:
                 score[pos] += 10
                 descs[pos] = descs[pos]+ "supports upgrade,"
         else:
@@ -755,10 +818,10 @@ def csp_score():
         descs[pos] = descs[pos]+ " "+referrer_check(row)[1]+","
         score[pos]+=hsts_check(row)[0]
         descs[pos] = descs[pos]+ " "+hsts_check(row)[1]+","
-        if strength_csp == False:
+        if strong_csp == False:
             score[pos]+=xxss_check(row)[0]
             descs[pos] = descs[pos]+ " "+xxss_check(row)[1]+","
-        if strength_framing == False:
+        if strong_framing == False:
             score[pos]+=xfo_check(row)[0]
             descs[pos] = descs[pos]+ " "+xfo_check(row)[1]+","
 
@@ -794,9 +857,9 @@ def grading_function():
         grades.append(grade_score)
         ret_dict[url[i]+ " "+grade_score] = percent
 
-    return ret_dict, url, grades
+    return ret_dict, url, grades, length_pol, descs
 
-grading_function()
+#grading_function()
 
 
 def grade_distribution():
@@ -840,7 +903,251 @@ def grade_distribution():
 
     plt.show()
 
-grade_distribution()
+#grade_distribution()
 # for row in db_list:
 #     if 'upgrade-insecure-requests' in row['csp_data']:
 #         print(row['url']+" "+row['csp_data']+'\n')
+
+def graph_grade_by_whitelist():
+    grade = grading_function()
+    
+    grade_list = grade[2]
+    grades = ['A', 'B', 'C', 'D', 'F']
+
+    lengths = []
+    for row in get_vals_by_row_all()[0]:
+        if row == None:
+            lengths.append(None)
+        else:
+            lengths.append(len(row))
+
+
+    i = 0
+    while i < len(grade_list):
+        if lengths[i] == None:
+            lengths.pop(i)
+            grade_list.pop(i)
+            continue
+        i += 1
+
+    policy_lengths = [[], [], [], [], []]
+    for i in range(len(grade_list)):
+        if grade_list[i] == "A":
+            policy_lengths[0].append(lengths[i])
+        elif grade_list[i] == "B":
+            policy_lengths[1].append(lengths[i])
+        elif grade_list[i] == "C":
+            policy_lengths[2].append(lengths[i])
+        elif grade_list[i] == "D":
+            policy_lengths[3].append(lengths[i])
+        elif grade_list[i] == "F":
+            policy_lengths[4].append(lengths[i])
+    
+    fig, axs = plt.subplots(len(grades), figsize=(8, 10), sharex=True)
+
+    for i, (grade, lengths) in enumerate(zip(grades, policy_lengths)):
+        axs[i].hist(lengths, bins=10, alpha=0.5)
+        axs[i].set_title(f'Grade {grade}')
+        axs[i].set_ylabel('Frequency')
+        axs[i].grid(True)
+
+    plt.xlabel('Policy Length')
+    plt.suptitle('Distribution of Policy Lengths by Grade')
+    plt.show()
+
+def graph_grade_by_policy_frequency():
+    grade = grading_function()
+    
+    grade_list = grade[2]
+    grades = ['A', 'B', 'C', 'D', 'F']
+
+    #vals_by_row = get_vals_by_row_all()[0]
+
+    vals_by_row = get_full_csp()[0]
+
+    delete_substr = ['*.', 'www.', 'https://', 'wss://', "ws://", "ssl.", ":*"]
+
+    """
+    for j in range(len(vals_by_row)):
+        if vals_by_row[j] != None:
+            for i in range(len(vals_by_row[j])):
+                for substr in delete_substr:
+                    vals_by_row[j][i] = vals_by_row[j][i].replace(substr, "")
+    """   
+
+    
+    
+
+
+    i = 0
+    while i < len(grade_list):
+        if vals_by_row[i] == None:
+            vals_by_row.pop(i)
+            grade_list.pop(i)
+            continue
+        i += 1
+
+    for i in range(len(vals_by_row)):
+        if len(vals_by_row[i]) > 0:
+            if vals_by_row[i][-1] == ';':
+                vals_by_row[i] = vals_by_row[i][0:-1]
+
+    #for i in range(5):
+    #    vals_by_row[i] = " ".join(vals_by_row[i])
+
+    policies_by_grade = [[], [], [], [], []]
+    for i in range(len(grade_list)):
+        if grade_list[i] == "A":
+            policies_by_grade[0].append(vals_by_row[i])
+        elif grade_list[i] == "B":
+            policies_by_grade[1].append(vals_by_row[i])
+        elif grade_list[i] == "C":
+            policies_by_grade[2].append(vals_by_row[i])
+        elif grade_list[i] == "D":
+            policies_by_grade[3].append(vals_by_row[i])
+        elif grade_list[i] == "F":
+            policies_by_grade[4].append(vals_by_row[i])
+
+    policy_freq_by_grade = [[], [], [], [], []]
+    for i, policies in enumerate(policies_by_grade):
+        count_policies = Counter(policies)
+        pol_freq = count_policies.most_common()
+
+        for policy, count in pol_freq:
+            policy_freq_by_grade[i].append((policy, count))
+
+
+    
+    
+    policy_frequencies = {grade: {} for grade in grades}
+
+    
+    for grade, sublist in zip(grades, policy_freq_by_grade):
+        for policy, count in sublist:
+            policy_frequencies[grade][policy] = count
+
+    
+    plt.figure(figsize=(15, 10))
+
+    for i, grade in enumerate(grades, 1):
+        plt.subplot(2, 3, i)
+        top_policies = sorted(policy_frequencies[grade].items(), key=lambda x: x[1], reverse=True)[:10]
+        policies, counts = zip(*top_policies)
+        plt.bar(policies, counts, color='skyblue')
+        plt.xlabel('Policy')
+        plt.ylabel('Frequency')
+        plt.title(f'Grade {grade} - Top 10 Policies')
+        plt.gca().set_xticks([])
+
+    plt.tight_layout()
+    plt.show()
+
+    # table
+    with open("top_ten_policies.txt", "w") as file:
+        for grade in grades:
+            file.write(f"Grade {grade}:\n")
+            top_policies = sorted(policy_frequencies[grade].items(), key=lambda x: x[1], reverse=True)[:10]
+            for i, (policy, count) in enumerate(top_policies, start=1):
+                policy_with_newlines = '\n'.join([policy[j:j+50] for j in range(0, len(policy), 50)])
+                file.write(f"{i}. {policy_with_newlines} ({count})\n")
+            file.write("-" * 30 + "\n\n")
+
+
+
+
+def graph_grade_by_avg_length():
+    grade = grading_function()
+    
+    grade_list = grade[2]
+    grades = ['A', 'B', 'C', 'D', 'F']
+
+    vals_by_row = get_vals_by_row_all()[0]
+
+    lengths = []
+    for row in vals_by_row:
+        if row == None:
+            lengths.append(None)
+        else:
+            lengths.append(len(row))
+
+
+    i = 0
+    while i < len(grade_list):
+        if lengths[i] == None:
+            lengths.pop(i)
+            grade_list.pop(i)
+            continue
+        i += 1
+
+    policy_lengths = [[], [], [], [], []]
+    for i in range(len(grade_list)):
+        if grade_list[i] == "A":
+            policy_lengths[0].append(lengths[i])
+        elif grade_list[i] == "B":
+            policy_lengths[1].append(lengths[i])
+        elif grade_list[i] == "C":
+            policy_lengths[2].append(lengths[i])
+        elif grade_list[i] == "D":
+            policy_lengths[3].append(lengths[i])
+        elif grade_list[i] == "F":
+            policy_lengths[4].append(lengths[i])
+
+    averages = [sum(sublist) / len(sublist) for sublist in policy_lengths]
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(averages, grades, marker='o', color='skyblue', linestyle='-')
+
+    plt.xlabel('Policy Length')
+    plt.ylabel('Grade')
+    plt.title('Grades by Average Policy Length')
+    plt.grid(True)
+    plt.gca().invert_yaxis()  
+    plt.show()
+
+
+# Use this to test the grading
+def show_grades():
+    ret = grading_function()
+
+    grades = ret[2]
+    descs = ret[4]
+    urls = ret[1]
+
+    """
+    burls = []
+    for i, score in enumerate(grades):
+        if score == "B":
+            burls.append(urls[i])
+            print(urls[i])
+            print(descs[i])
+    """
+    
+    """
+    aurls = []
+    for i, score in enumerate(grades):
+        if score == "A":
+            aurls.append(urls[i])
+    """     
+    
+
+    """
+    furls = []
+    for i, score in enumerate(grades):
+        if score == "F":
+            furls.append(urls[i])
+            print(urls[i])
+            print(descs[i])
+            print()
+    """
+
+    for row in db_list:
+        if "default-src 'self' 'unsafe-inline'" in row["csp_data"]:
+            for i, desc in enumerate(descs):
+                if row['url'] == urls[i]:
+                    print(urls[i])
+                    print(row['csp_data'])
+                    print(desc)
+                    print(grades[i])
+                    print()
+                    
+

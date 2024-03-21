@@ -1,0 +1,603 @@
+Grade A:
+1. upgrade-insecure-requests (10)
+2. default-src 'self';base-uri 'self';font-src 'self'
+ https: data:;form-action 'self';frame-ancestors '
+self';img-src 'self' data:;object-src 'none';scrip
+t-src 'self';script-src-attr 'none';style-src 'sel
+f' https: 'unsafe-inline';upgrade-insecure-request
+s (5)
+3. sandbox; default-src 'self'; script-src 'none'; ob
+ject-src 'none';  (4)
+4. default-src 'self' *.g2crowd.com *.g2.com; connect
+-src 'self' *.g2crowd.com *.g2.com; font-src 'self
+' *.g2crowd.com *.g2.com; form-action 'self' *.g2c
+rowd.com *.g2.com; frame-src 'self' *.g2crowd.com 
+*.g2.com; img-src 'self' *.g2crowd.com *.g2.com; m
+anifest-src 'self' *.g2crowd.com *.g2.com; media-s
+rc 'self' *.g2crowd.com *.g2.com; object-src 'self
+' *.g2crowd.com *.g2.com; script-src 'self' *.g2cr
+owd.com *.g2.com; style-src 'self' *.g2crowd.com *
+.g2.com; worker-src 'self' *.g2crowd.com *.g2.com (3)
+5. default-src 'self';base-uri 'self';block-all-mixed
+-content;font-src 'self' https: data:;frame-ancest
+ors 'self';img-src 'self' data:;object-src 'none';
+script-src 'self';script-src-attr 'none';style-src
+ 'self' https: 'unsafe-inline';upgrade-insecure-re
+quests (3)
+6. default-src 'self'; connect-src 'self' https://*.g
+oogle-analytics.com https://*.analytics.google.com
+ https://*.googletagmanager.com; frame-src 'none';
+ img-src 'self' data: *.ttcache.com https://*.ttca
+che.com https://*.google-analytics.com https://*.g
+oogletagmanager.com; media-src 'none'; object-src 
+'none'; script-src 'self' https://*.googletagmanag
+er.com; style-src 'self' 'unsafe-inline' (3)
+7. default-src 'self' 'unsafe-inline' (2)
+8. default-src 'none'; base-uri 'self'; child-src git
+hub.com/assets-cdn/worker/ gist.github.com/assets-
+cdn/worker/; connect-src 'self' uploads.github.com
+ www.githubstatus.com collector.github.com raw.git
+hubusercontent.com api.github.com github-cloud.s3.
+amazonaws.com github-production-repository-file-5c
+1aeb.s3.amazonaws.com github-production-upload-man
+ifest-file-7fdce7.s3.amazonaws.com github-producti
+on-user-asset-6210df.s3.amazonaws.com api.githubco
+pilot.com objects-origin.githubusercontent.com *.a
+ctions.githubusercontent.com wss://*.actions.githu
+busercontent.com productionresultssa0.blob.core.wi
+ndows.net/ productionresultssa1.blob.core.windows.
+net/ productionresultssa2.blob.core.windows.net/ p
+roductionresultssa3.blob.core.windows.net/ product
+ionresultssa4.blob.core.windows.net/ productionres
+ultssa5.blob.core.windows.net/ productionresultssa
+6.blob.core.windows.net/ productionresultssa7.blob
+.core.windows.net/ productionresultssa8.blob.core.
+windows.net/ productionresultssa9.blob.core.window
+s.net/ productionresultssa10.blob.core.windows.net
+/ productionresultssa11.blob.core.windows.net/ pro
+ductionresultssa12.blob.core.windows.net/ producti
+onresultssa13.blob.core.windows.net/ productionres
+ultssa14.blob.core.windows.net/ productionresultss
+a15.blob.core.windows.net/ productionresultssa16.b
+lob.core.windows.net/ productionresultssa17.blob.c
+ore.windows.net/ productionresultssa18.blob.core.w
+indows.net/ productionresultssa19.blob.core.window
+s.net/ github-production-repository-image-32fea6.s
+3.amazonaws.com github-production-release-asset-2e
+65be.s3.amazonaws.com insights.github.com wss://al
+ive.github.com github.githubassets.com; font-src g
+ithub.githubassets.com; form-action 'self' github.
+com gist.github.com objects-origin.githubuserconte
+nt.com; frame-ancestors 'none'; frame-src viewscre
+en.githubusercontent.com notebooks.githubuserconte
+nt.com; img-src 'self' data: github.githubassets.c
+om media.githubusercontent.com camo.githubusercont
+ent.com identicons.github.com avatars.githubuserco
+ntent.com github-cloud.s3.amazonaws.com objects.gi
+thubusercontent.com secured-user-images.githubuser
+content.com/ user-images.githubusercontent.com/ pr
+ivate-user-images.githubusercontent.com opengraph.
+githubassets.com github-production-user-asset-6210
+df.s3.amazonaws.com customer-stories-feed.github.c
+om spotlights-feed.github.com objects-origin.githu
+busercontent.com *.githubusercontent.com; manifest
+-src 'self'; media-src github.com user-images.gith
+ubusercontent.com/ secured-user-images.githubuserc
+ontent.com/ private-user-images.githubusercontent.
+com github-production-user-asset-6210df.s3.amazona
+ws.com gist.github.com github.githubassets.com; sc
+ript-src github.githubassets.com; style-src 'unsaf
+e-inline' github.githubassets.com; upgrade-insecur
+e-requests; worker-src github.com/assets-cdn/worke
+r/ gist.github.com/assets-cdn/worker/ (1)
+9. base-uri 'self' ; child-src https://www.dropbox.co
+m/static/serviceworker/ blob: ; connect-src https:
+//* ws://127.0.0.1:*/ws wss://dsimports.dropbox.co
+m/ ; default-src 'none' ; font-src https://* data:
+ ; form-action 'self' https://www.dropbox.com/ htt
+ps://dl-web.dropbox.com/ https://photos.dropbox.co
+m/ https://paper.dropbox.com/ https://showcase.dro
+pbox.com/ https://www.hellofax.com/ https://app.he
+llofax.com/ https://www.hellosign.com/ https://app
+.hellosign.com/ https://docsend.com/ https://www.d
+ocsend.com/ https://help.dropbox.com/ https://navi
+.dropbox.jp/ https://a.sprig.com/ https://selfguid
+edlearning.dropboxbusiness.com/ https://instructor
+ledlearning.dropboxbusiness.com/ https://sales.dro
+pboxbusiness.com/ https://accounts.google.com/ htt
+ps://api.login.yahoo.com/ https://login.yahoo.com/
+ https://experience.dropbox.com/ https://pal-test.
+adyen.com https://2e83413d8036243b-Dropbox-pal-liv
+e.adyenpayments.com/ https://onedrive.live.com/pic
+ker ; frame-src https://* carousel: dbapi-6: dbapi
+-7: dbapi-8: dropbox-client: itms-apps: itms-appss
+: ; img-src https://* data: blob: ; media-src http
+s://* blob: ; object-src 'self' https://cfl.dropbo
+xstatic.com/static/ https://www.dropboxstatic.com/
+static/ ;  script-src 'unsafe-eval' https://www.dr
+opbox.com/static/api/ https://www.dropbox.com/page
+_success/ https://cfl.dropboxstatic.com/static/ ht
+tps://www.dropboxstatic.com/static/ https://accoun
+ts.google.com/gsi/client https://canny.io/sdk.js '
+nonce-hB3UeaNZKVMG/dbduRgx' ; style-src https://* 
+'unsafe-inline' 'unsafe-eval' ; worker-src https:/
+/www.dropbox.com/static/serviceworker/ https://www
+.dropbox.com/encrypted_folder_download/service_wor
+ker.js blob: (1)
+10. default-src 'none'; script-src 'strict-dynamic' 'n
+once-fbFpE+vh0aIr2bMBiYPl9qoMJgSsE2n1qUNqJtN/4FuzC
+vG9m2' 'self' 'report-sample' 'unsafe-inline' asse
+ts.wearehearken.eu cdn.syndication.twimg.com conne
+ct.facebook.net c.files.bbci.co.uk emp.bbci.co.uk 
+ems.wearehearken.eu modules.wearehearken.eu mybbc-
+analytics.files.bbci.co.uk nav.files.bbci.co.uk ne
+ws.files.bbci.co.uk platform.twitter.com public.fl
+ourish.studio static.bbc.co.uk static.bbci.co.uk s
+tatic.chartbeat.com static2.chartbeat.com www.bbc.
+co.uk www.instagram.com www.ons.gov.uk gn-web-asse
+ts.api.bbc.com www.google-analytics.com bitesize.f
+iles.bbci.co.uk www.tiktok.com lf16-tiktok-web.ttw
+static.com static.files.bbci.co.uk; img-src 'self'
+ https: data:; font-src c.files.bbci.co.uk gel.fil
+es.bbci.co.uk static.files.bbci.co.uk static.bbci.
+co.uk news.files.bbci.co.uk ws-downloads.files.bbc
+i.co.uk bitesize.files.bbci.co.uk; style-src brand
+ing.files.bbci.co.uk cdn.riddle.com flo.uri.sh new
+s.files.bbci.co.uk platform.twitter.com static.bbc
+.co.uk static.bbci.co.uk static.files.bbci.co.uk t
+on.twimg.com www.riddle.com 'unsafe-inline' lf16-t
+iktok-web.ttwstatic.com; frame-src 'self' bbc001.c
+arto.com bbc003.carto.com bbc-maps.carto.com cdn.r
+iddle.com chartbeat.com emp.bbc.co.uk emp.bbc.com 
+flo.uri.sh graphics.reuters.com www.reuters.com m.
+facebook.com news.files.bbci.co.uk personaltaxcalc
+ulator2.deloittecloud.co.uk platform.twitter.com p
+ublic.flourish.studio static2.chartbeat.com syndic
+ation.twitter.com web.facebook.com www.bbc.co.uk w
+ww.facebook.com www.instagram.com www.tiktok.com w
+ww.ons.gov.uk www.riddle.com www.youtube.com www.y
+outube-nocookie.com toybox.tools.bbc.co.uk uk-scri
+pt.dotmetrics.net ssp-app-uk.votenow.tv ssp-app-uk
+test.votenow.tv session.test.bbc.co.uk session.bbc
+.co.uk; object-src 'none'; manifest-src static.fil
+es.bbci.co.uk bitesize.files.bbci.co.uk; media-src
+ 'self' blob: https:; connect-src 'self' https:; c
+hild-src blob:; base-uri 'none'; form-action 'self
+' platform.twitter.com syndication.twitter.com uk-
+script.dotmetrics.net/DeviceInfo.dotmetrics; frame
+-ancestors 'none'; upgrade-insecure-requests; repo
+rt-to default;  (1)
+------------------------------
+
+Grade B:
+1. default-src 'none'; frame-ancestors 'none'; base-u
+ri 'none' (422)
+2. upgrade-insecure-requests (33)
+3. frame-ancestors 'self' (13)
+4. default-src data: blob: 'self' https://*.fbsbx.com
+ 'unsafe-inline' *.facebook.com *.fbcdn.net 'unsaf
+e-eval';script-src *.facebook.com *.fbcdn.net *.fa
+cebook.net *.google-analytics.com *.google.com 127
+.0.0.1:* 'unsafe-inline' blob: data: 'self' connec
+t.facebook.net 'unsafe-eval';style-src fonts.googl
+eapis.com *.fbcdn.net data: *.facebook.com 'unsafe
+-inline';connect-src *.facebook.com facebook.com *
+.fbcdn.net *.facebook.net wss://*.facebook.com:* w
+ss://*.whatsapp.com:* wss://*.fbcdn.net attachment
+.fbsbx.com ws://localhost:* blob: *.cdninstagram.c
+om 'self' http://localhost:3103 wss://gateway.face
+book.com wss://edge-chat.facebook.com wss://snaptu
+-d.facebook.com wss://kaios-d.facebook.com/ v.what
+sapp.net *.fbsbx.com *.fb.com;font-src data: *.gst
+atic.com *.facebook.com *.fbcdn.net *.fbsbx.com;im
+g-src *.fbcdn.net *.facebook.com data: https://*.f
+bsbx.com facebook.com *.cdninstagram.com fbsbx.com
+ fbcdn.net connect.facebook.net *.carriersignal.in
+fo blob: android-webview-video-poster: googleads.g
+.doubleclick.net www.googleadservices.com *.whatsa
+pp.net *.fb.com *.oculuscdn.com *.tenor.co *.tenor
+.com *.giphy.com;media-src *.cdninstagram.com blob
+: *.fbcdn.net *.fbsbx.com www.facebook.com *.faceb
+ook.com data: *.tenor.co *.tenor.com https://*.gip
+hy.com;frame-src *.doubleclick.net *.google.com *.
+facebook.com www.googleadservices.com *.fbsbx.com 
+fbsbx.com data: www.instagram.com *.fbcdn.net http
+s://paywithmybank.com/ https://sandbox.paywithmyba
+nk.com/;worker-src blob: *.facebook.com data:;bloc
+k-all-mixed-content;upgrade-insecure-requests (9)
+5. object-src 'none'; frame-ancestors https://*.trust
+arc.com https://*.prod.internal.trustarc.com https
+://*.trustarc.eu https://*.prod.internal.trustarc.
+eu https://*.staging.internal.trustarc.com https:/
+/*.trustarc-svc.net https://*.truste-svc.net https
+://*.qa.truste-svc.net https://*.dev.truste-svc.ne
+t  http://localhost:* https://*.nymity.com https:/
+/*.qanym;; upgrade-insecure-requests; block-all-mi
+xed-content;  (7)
+6. frame-ancestors 'none' (6)
+7.  (4)
+8. default-src 'self' (2)
+9. upgrade-insecure-requests; frame-ancestors 'self' 
+https://explore.bitdefender.com/; object-src 'none
+'; script-src 'self' 'unsafe-inline' 'unsafe-eval'
+ *.roeyecdn.com *.unpkg.com *.googleadservices.com
+ *.2checkout.com *.cookielaw.org *.criteo.com *.dw
+in1.com *.bitdefender.com *.bitdefender.biz *.bitd
+efender.net *.bitdefender.fr *.bitdefender.de *.bi
+tdefender.com.au *.bitdefender.co.uk *.bitdefender
+.es *.bitdefender.it *.bitdefender.pt *.bitdefende
+r.com.br *.bitdefender.ro *.bitdefender.nl *.bitde
+fender.be *.bitdefender.se *.bitdefender.co.jp bit
+defender.co.jp bitdefender.applytojob.com *.adobe.
+com *.facebook.com *.facebook.net *.doubleclick.ne
+t *.adsrvr.org *.mathtag.com *.google.com *.google
+.ro *.flashtalking.com *.amazon-adsystem.com *.liv
+echatinc.com *.twitter.com *.ads-twitter.com  *.ce
+dexis.com *.cedexis-test.com *.youtube.com *.sound
+cloud.com *.hubspot.com *.cookiebot.com *.vimeo.co
+m *.edgecastcdn.net *.linkedin.com *.hsforms.com *
+.hsforms.net *.cloudfront.net *.edgecastdns.net *.
+hotjar.com *.zanox.ws *.zanox.com *.usemax.de usem
+ax.de dpm.de *.mdex.net mdex.net *.omniture.com wi
+dget.trustpilot.com *.2o7.net *.omtrdc.net *.demde
+x.net *.adobedtm.com api-eu.boldchat.com livechat-
+eu.boldchat.com *.youtube-nocookie.com *.instagram
+.com instawidget.net *.scarabresearch.com *.zenaps
+.com pixel.xonaz.com tags.dynamo.one *.redintellig
+ence.net 20787700p.rfihub.com *.outgrow.us *.alche
+mer.com *.adyen.com *.paypal.com paypal.com ad.ad-
+srv.net fullstory.com ad4m.at *.googletagmanager.c
+om bat.bing.com *.impactradius-event.com *.outbrai
+n.com *.gartner.com *.gstatic.com *.licdn.com *.bi
+zible.com *.clarity.ms *.demandbase.com *.hs-scrip
+ts.com *.sf14g.com *.hsadspixel.net *.hs-analytics
+.net *.hsleadflows.net *.hs-banner.com *.usemessag
+es.com *.company-target.com *.techtarget.com *.pri
+vacyportal-de.onetrust.com *.geolocation.onetrust.
+com *.avads.net (2)
+10. default-src 'self';  script-src 'self' 'unsafe-inl
+ine' 'unsafe-eval' https://*.mmcdn.com https://*.h
+ighwebmedia.com https://*.chaturbate.com https://c
+haturbate.com https://ajax.googleapis.com https://
+js-agent.newrelic.com https://cdnjs.cloudflare.com
+ https://www.google-analytics.com https://*.google
+tagmanager.com https://www.google.com/recaptcha/ h
+ttps://www.google.com/cv/ https://www.gstatic.com/
+recaptcha/ https://www.gstatic.com/cv/ https://www
+.gstatic.com/eureka/ https://www.gstatic.com/cast/
+ https://*.nr-data.net https://certify-js.alexamet
+rics.com https://player.vimeo.com/api/player.js ht
+tps://static.hotjar.com https://script.hotjar.com 
+;  style-src 'self' data: 'unsafe-inline' https://
+*.mmcdn.com https://*.highwebmedia.com https://cdn
+js.cloudflare.com https://fonts.googleapis.com htt
+ps://static.hotjar.com https://script.hotjar.com; 
+ img-src 'self' data: https://*.mmcdn.com https://
+*.highwebmedia.com https://*.stream.highwebmedia.c
+om https://*.chaturbate.com https://chaturbate.com
+ https://*.google-analytics.com https://*.googleta
+gmanager.com https://static-pub.highwebmedia.com h
+ttps://s3pv.highwebmedia.com https://cbphotovideo.
+s3.amazonaws.com https://cbphotovideo-eu.s3.amazon
+aws.com https://static-pub.highwebmedia.com.s3.ama
+zonaws.com https://wowdvr.s3.amazonaws.com https:/
+/cbvideoupload.s3.amazonaws.com https://cdnjs.clou
+dflare.com https://www.gstatic.com https://*.nr-da
+ta.net https://certify.alexametrics.com https://st
+ats.g.doubleclick.net https://cbgames.s3.amazonaws
+.com https://player.vimeo.com https://script.hotja
+r.com http://script.hotjar.com ;  font-src 'self' 
+data: https://*.mmcdn.com https://*.highwebmedia.c
+om https://cdnjs.cloudflare.com https://fonts.gsta
+tic.com http://script.hotjar.com https://script.ho
+tjar.com ;  connect-src 'self' blob: blob https://
+*.mmcdn.com wss://*.mmcdn.com wss://*.mmcdn.com:84
+43 https://*.highwebmedia.com wss://*.highwebmedia
+.com wss://*.highwebmedia.com:8443 https://*.nr-da
+ta.net https://*.chaturbate.com https://chaturbate
+.com https://*.google-analytics.com https://analyt
+ics.google.com https://*.analytics.google.com http
+s://*.googletagmanager.com https://cbvideoupload.s
+3-accelerate.amazonaws.com https://stats.g.doublec
+lick.net https://internet-up.ably-realtime.com htt
+ps://static-pub.highwebmedia.com https://s3pv.high
+webmedia.com https://cbphotovideo.s3.amazonaws.com
+ https://cbphotovideo-eu.s3.amazonaws.com https://
+static-pub.highwebmedia.com.s3.amazonaws.com https
+://wowdvr.s3.amazonaws.com https://cbvideoupload.s
+3.amazonaws.com https://tls-use1.fpapi.io https://
+use1.fptls.com https://eun1.fptls.com https://aps1
+.fptls.com https://*.hotjar.com https://*.hotjar.i
+o wss://*.hotjar.com https://*.conviva.com https:/
+/drt1fhpy4haqm.cloudfront.net;  media-src 'self' h
+ttps://*.mmcdn.com https://*.highwebmedia.com http
+s://*.chaturbate.com https://chaturbate.com medias
+ource: blob: data: https://storage.googleapis.com 
+https://static-pub.highwebmedia.com https://s3pv.h
+ighwebmedia.com https://cbphotovideo.s3.amazonaws.
+com https://cbphotovideo-eu.s3.amazonaws.com https
+://static-pub.highwebmedia.com.s3.amazonaws.com ht
+tps://wowdvr.s3.amazonaws.com https://cbvideouploa
+d.s3.amazonaws.com;  object-src 'self' https://*.m
+mcdn.com https://*.highwebmedia.com https://downlo
+ad.macromedia.com https://static-pub.highwebmedia.
+com https://s3pv.highwebmedia.com https://cbphotov
+ideo.s3.amazonaws.com https://cbphotovideo-eu.s3.a
+mazonaws.com https://static-pub.highwebmedia.com.s
+3.amazonaws.com https://wowdvr.s3.amazonaws.com ht
+tps://cbvideoupload.s3.amazonaws.com ;  frame-src 
+'self' https://*.mmcdn.com https://*.chaturbate.co
+m https://chaturbate.com https://*.highwebmedia.co
+m https://adserver.exoticads.com https://www.googl
+e.com/recaptcha/ https://*.wnu.com https://wnu.com
+ https://checkout.2000charge.com https://www.sofor
+t.com https://*.girogate.de https://player.vimeo.c
+om https://vars.hotjar.com https://directory-live.
+cb.dev https://*.live.mmwebc.dev ;  child-src 'sel
+f' blob: blob ;  worker-src 'self' blob: blob ;  f
+orm-action 'self' https://*.chaturbate.com https:/
+/chaturbate.com https://*.stream.highwebmedia.com 
+https://*.wnu.com https://wnu.com https://devporta
+l.cb.dev https://*.web.amer-1.jumio.ai https://saa
+s-onboarding.incodesmile.com https://smartpay.coin
+smart.com https://crypto-payments.net https://secu
+re.paygarden.com ;  manifest-src 'self' https://*.
+mmcdn.com https://*.highwebmedia.com ;   (2)
+------------------------------
+
+Grade C:
+1. frame-ancestors 'self' (71)
+2. script-src 'none'; object-src 'none' (59)
+3. frame-ancestors 'none' (9)
+4. sandbox allow-scripts; default-src 'self'; img-src
+ https:; style-src 'unsafe-inline'; script-src 'un
+safe-inline';  (7)
+5. default-src * blob: data:; script-src blob: https:
+//cdn.ampproject.org/lts/ https://cdn.ampproject.o
+rg/rtv/ https://cdn.ampproject.org/sw/ https://cdn
+.ampproject.org/v0.js https://cdn.ampproject.org/v
+0.mjs https://cdn.ampproject.org/v0/ https://cdn.a
+mpproject.org/viewer/; object-src 'none'; style-sr
+c 'unsafe-inline' https://cdn.ampproject.org/rtv/ 
+https://cdn.materialdesignicons.com https://cdnjs.
+cloudflare.com/ajax/libs/font-awesome/ https://clo
+ud.typography.com https://fast.fonts.net https://f
+onts.googleapis.com https://maxcdn.bootstrapcdn.co
+m https://p.typekit.net https://pro.fontawesome.co
+m https://use.fontawesome.com https://use.typekit.
+net;  (7)
+6. require-trusted-types-for 'script' (5)
+7. upgrade-insecure-requests (5)
+8. script-src 'none'; frame-src 'none'; sandbox (5)
+9. script-src 'none' (4)
+10. default-src 'none'; navigate-to 'none'; form-actio
+n 'none' (3)
+------------------------------
+
+Grade D:
+1. default-src 'self' data: blob: *;script-src *.face
+book.com *.fbcdn.net *.facebook.net *.google-analy
+tics.com *.google.com 127.0.0.1:* 'unsafe-inline' 
+'unsafe-eval' blob: data: 'self';style-src data: b
+lob: 'unsafe-inline' *;connect-src *.facebook.com 
+facebook.com *.fbcdn.net *.facebook.net wss://*.fa
+cebook.com:* wss://*.whatsapp.com:* wss://*.fbcdn.
+net attachment.fbsbx.com ws://localhost:* blob: *.
+cdninstagram.com 'self';block-all-mixed-content;up
+grade-insecure-requests;require-trusted-types-for 
+'script' (47)
+2. upgrade-insecure-requests (17)
+3. frame-src https://challenges.cloudflare.com/ blob:
+; base-uri 'self' (16)
+4. frame-ancestors https://www.microsoft.com (8)
+5. default-src * data: blob: about: vkcalls:;script-s
+rc 'self' https://vk.com https://*.vk.com https://
+vk.ru https://*.vk.ru https://static.vk.me https:/
+/*.mail.ru https://r.mradx.net https://s.ytimg.com
+ https://platform.twitter.com https://cdn.syndicat
+ion.twimg.com https://www.instagram.com https://co
+nnect.facebook.net https://telegram.org https://*.
+yandex.ru https://*.google-analytics.com https://*
+.youtube.com https://maps.googleapis.com https://t
+ranslate.googleapis.com https://*.google.com https
+://google.com https://*.vkpartner.ru https://*.moa
+tads.com https://*.adlooxtracking.ru https://*.ser
+ving-sys.ru https://*.weborama-tech.ru https://*.g
+static.com https://*.google.ru https://securepubad
+s.g.doubleclick.net https://cdn.ampproject.org htt
+ps://www.googletagmanager.com https://googletagman
+ager.com https://*.vk-cdn.net https://*.hit.gemius
+.pl https://yastatic.net https://analytics.tiktok.
+com 'unsafe-inline' 'unsafe-eval' blob:;style-src 
+https://vk.com https://*.vk.com https://vk.ru http
+s://*.vk.ru https://static.vk.me https://r.mradx.n
+et https://ton.twimg.com https://tagmanager.google
+.com https://platform.twitter.com https://*.google
+apis.com 'self' 'unsafe-inline' (5)
+6. frame-ancestors 'self' (3)
+7. frame-ancestors 'self' https://*.sli.ke https://ec
+onomictimes.indiatimes.com https://navbharattimes.
+indiatimes.com https://m.timesofindia.com https://
+m.economictimes.com https://gadgetsnow.com https:/
+/www.gadgetsnow.com https://www.google.com https:/
+/google.com https://static-toiimg-com.cdn.ampproje
+ct.org https://m-timesofindia-com.cdn.ampproject.o
+rg https://www.newspointapp.com https://timesofind
+ia.indiatimes.com https://auto.timesofindia.com ht
+tps://timesofindia-indiatimes-com.cdn.ampproject.o
+rg (2)
+8. default-src 'none'; connect-src 'self' *.licdn.com
+ *.linkedin.com cdn.linkedin.oribi.io dpm.demdex.n
+et/id lnkd.demdex.net blob: accounts.google.com/gs
+i/ linkedin.sc.omtrdc.net/b/ss/ v.clarity.ms/colle
+ct *.microsoft.com *.adnxs.com *.tealiumiq.com; sc
+ript-src 'report-sample' 'sha256-th47JTnh6tX15SUn/
+I+GGmsOSXpa7dh5Skner77gxlY=' 'sha256-SSoodjUD3LGm2
+FfFCVHGqEb8D4UM3OOigidT2UKDcYg=' 'sha256-cKTgdnmO6
++hXd85a9wKg1effVfVzenUAtUCyOKY9bQE=' 'sha256-DwtT8
++ZZKpxH9pqZNAmJ3GdbLAh5SsYaXR3omTXPCns=' 'sha256-s
+V9jZa797T0QWBzcU/CNd4tpBhTnh+TFdLnfjlitl28=' 'sha2
+56-aa/Q8CRBDSqTQbCIyioPhZaz+G+dbPyu7BzsjInEmiU=' '
+sha256-THuVhwbXPeTR0HszASqMOnIyxqEgvGyBwSPBKBF/iMc
+=' 'sha256-zTIusdVJJeXz9+iox2a+pdDglzbpRpFVRzEwvW4
+AONk=' 'sha256-iC8MPqNLw0FDnsBf4DlSkFLNTwhkI85aoui
+AEB819ic=' 'sha256-2EqrEvcPzl8c6/TSGVvaVMEe7lg700M
+Az/te4/3kTYY=' 'sha256-y5uW69VItKj51mcc7UD9qfptDVU
+qicZL+bItEpvVNDw=' 'sha256-DatsFGoJ8gFkzzxo47Ou76W
+Z+3QBPOQHtBu9p9b3DhA=' 'sha256-k95cyM8gFgPziZe5VQ2
+IvJvBUVyd5zFt2CokIUwqdHE=' 'sha256-PyCXNcEkzRWqbiN
+r087fizmiBBrq9O6GGD8eV3P09Ik=' 'sha256-RFqsjmAF1N5
+LnfpaHFvPqFlVkeIS/DtTAFor+JjJJVc=' 'sha256-2SQ55Er
+m3CPCb+k03EpNxU9bdV3XL9TnVTriDs7INZ4=' 'sha256-S/K
+SPe186K/1B0JEjbIXcCdpB97krdzX05S+dHnQjUs=' 'sha256
+-9pXOIwF4N0gPltLd3AI69lkCjSC2H/Eb3sc5zdmUyYU=' 'sh
+a256-jou6v/Nleyzoc+LXktAv1Fp8M807dVVxy7E/yzVljHc='
+ 'sha256-6E4e/3dSvj/8JZT2S2yR91mspqM6MyOpKl5lrhHsZ
+a8=' 'sha256-3woF8BZ54TeXM+czaH3aXoaJsVpiamuAKFsXD
+ykAR/Q=' 'sha256-vIfNcKb8ixJg1cfJIoNNYjWcm0lezj1/X
+pUNFiZyVsU=' 'sha256-cLsHUHFgT/VGX04cZrJ9xgm4HbzTR
+7ptutkxK+7BlMk=' 'sha256-BwU8jMnQYUhjOpsDVABpfddV/
+DlP1ZYrFcTumYw7x54=' 'sha256-wz6ika9i3WU3bpUPdhYDZ
+eO/NrDQniDyiscN0LWnyaY=' static.licdn.com static-e
+xp1.licdn.com static-exp2.licdn.com static-exp3.li
+cdn.com platform.linkedin.com platform-akam.linked
+in.com platform-ecst.linkedin.com platform-azur.li
+nkedin.com snap.licdn.com www.googletagmanager.com
+/gtag/js; img-src data: blob: * android-webview-vi
+deo-poster:; font-src data: *; style-src 'self' 'u
+nsafe-inline' static.licdn.com static-exp1.licdn.c
+om static-exp2.licdn.com static-exp3.licdn.com; me
+dia-src 'self' *.licdn.com *.lynda.com; worker-src
+ 'self' blob: static.licdn.com static-exp1.licdn.c
+om static-exp2.licdn.com static-exp3.licdn.com; fr
+ame-src 'self' www.youtube.com/embed/ www.youtube-
+nocookie.com/embed/ lnkd.demdex.net smartlock.goog
+le.com accounts.google.com player.vimeo.com *.link
+edin.com www.slideshare.net *.megaphone.fm *.omny.
+fm *.sounder.fm msit.powerbi.com app.powerbi.com l
+inkedin.github.io *.licdn.com *.adnxs.com acdn.adn
+xs-simple.com radar.cedexis.com; frame-ancestors '
+self' *.www.linkedin.com:*; manifest-src 'self';  (1)
+9. block-all-mixed-content;connect-src 'self' data: '
+unsafe-inline' 'unsafe-eval' https: blob: wss:;def
+ault-src 'self' data: 'unsafe-inline' 'unsafe-eval
+' https: blob: wss: 'report-sample';font-src 'self
+' data: https: blob: wss: assets.msn.com assets2.m
+sn.com assets.msn.cn assets2.msn.cn;frame-ancestor
+s 'self' int1.msn.com ntp.msn.cn ntp.msn.com windo
+ws-int1.msn.com windows.msn.cn windows.msn.com www
+.bing.com www.msn.com mathsolver.microsoft.com mat
+hsolver-dev.microsoft.com chrome-extension://lklfb
+kdigihjaaeamncibechhgalldgl;media-src 'self' https
+: blob:;report-to csp-endpoint;worker-src 'self' h
+ttps: blob: 'report-sample' (1)
+10. default-src 'self' blob: s.pinimg.com; font-src 's
+elf' s.pinimg.com data: fonts.googleapis.com fonts
+.gstatic.com use.typekit.net; style-src 'self' blo
+b: 'unsafe-inline' data: *.pinimg.com *.pinterest.
+com accounts.google.com fonts.googleapis.com *.ady
+en.com *.adyenpayments.com; img-src blob: data: *;
+ base-uri 'none'; connect-src 'self' blob: *.pinim
+g.com *.pinterest.com accounts.google.com *.adyen.
+com pinterest-salvador.s3.amazonaws.com *.adyenpay
+ments.com *.facebook.com www.googleapis.com *.drop
+boxapi.com pinterest-aberdeen.s3.amazonaws.com pin
+terest-aberdeen.s3.us-east-1.amazonaws.com pintere
+st-anaheim.s3.amazonaws.com pinterest-anaheim.s3.u
+s-east-1.amazonaws.com pinterest-hilo.s3.amazonaws
+.com pinterest-hilo.s3.us-east-1.amazonaws.com pin
+terest-sim-toontown.s3.amazonaws.com pinterest-sim
+-toontown.s3.us-east-1.amazonaws.com pinterest-med
+ia-upload.s3.amazonaws.com pinterest-media-upload.
+s3.us-east-1.amazonaws.com pinterest-media-upload.
+s3-accelerate.amazonaws.com pinterest-media-upload
+.s3-accelerate.us-east-1.amazonaws.com pinterest-m
+ilwaukee.s3.amazonaws.com pinterest-milwaukee.s3.u
+s-east-1.amazonaws.com pinterest-poughkeepsie.s3.a
+mazonaws.com pinterest-poughkeepsie.s3.us-east-1.a
+mazonaws.com pinterest-waterloo.s3.amazonaws.com p
+interest-waterloo.s3.us-east-1.amazonaws.com pinte
+rest-plymouth.s3.amazonaws.com pinterest-plymouth.
+s3.us-east-1.amazonaws.com pinterest-salvador.s3.u
+s-east-1.amazonaws.com *.cedexis.com *.cedexis-rad
+ar.net *.tvpixel.com api.pinadmin.com *.live-video
+.net https://*.daily.co https://*.pluot.blue wss:/
+/*.wss.daily.co; form-action 'self' *.adyen.com *.
+sofort.com *.adyenpayments.com; frame-src 'self' *
+.pinimg.com *.pinterest.com *.adyen.com static-san
+dbox.dlocal.com static.dlocal.com *.google.com *.f
+acebook.com www.recaptcha.net pinterest-hilo.s3.am
+azonaws.com pinterest-hilo.s3.us-east-1.amazonaws.
+com pinterest-sim-toontown.s3.amazonaws.com pinter
+est-sim-toontown.s3.us-east-1.amazonaws.com pinter
+est-milwaukee.s3.amazonaws.com pinterest-milwaukee
+.s3.us-east-1.amazonaws.com pinterest-waterloo.s3.
+amazonaws.com pinterest-waterloo.s3.us-east-1.amaz
+onaws.com pinterest-tolu.s3.amazonaws.com *.pinter
+dev.com content.googleapis.com *.youtube.com *.yti
+mg.com player.vimeo.com calendly.com vine.co bid.g
+.doubleclick.net *.fls.doubleclick.net pinlogs.s3.
+amazonaws.com pinlogs.s3.us-east-1.amazonaws.com a
+dvertising-delivery-metric-reports.s3.amazonaws.co
+m advertising-delivery-metric-reports.s3.us-east-1
+.amazonaws.com servedby.flashtalking.com pinterest
+-uk.admo.tv pinterest-uk-web.admo.tv fbrpc://call 
+*.linkedin.com px.ads.linkedin.com; media-src 'sel
+f' blob: data: *.pinimg.com *.live-video.net; obje
+ct-src 'self'; script-src 'nonce-ccf526c5ae5687c67
+bb5a36ebaa36791' 'strict-dynamic' 'self' blob: 'un
+safe-inline' *.pinimg.com *.pinterest.com *.adyen.
+com js.dlocal.com js-sandbox.dlocal.com static-san
+dbox.dlocal.com static.dlocal.com *.adyenpayments.
+com 'report-sample' *.google.com connect.facebook.
+net *.google-analytics.com *.facebook.com *.google
+adservices.com *.doubleclick.net *.googletagmanage
+r.com radar.cedexis.com *.cedexis-test.com www.gst
+atic.com/recaptcha/ www.gstatic.cn/recaptcha/ www.
+recaptcha.net 'wasm-unsafe-eval'; worker-src 'self
+' blob: 'unsafe-inline';  frame-ancestors 'self' ,
+ script-src 'self' blob: 'unsafe-inline' *.pinimg.
+com *.pinterest.com *.adyen.com js.dlocal.com js-s
+andbox.dlocal.com static-sandbox.dlocal.com static
+.dlocal.com *.adyenpayments.com 'report-sample' *.
+google.com connect.facebook.net *.google-analytics
+.com *.facebook.com *.googleadservices.com *.doubl
+eclick.net *.googletagmanager.com radar.cedexis.co
+m *.cedexis-test.com www.gstatic.com/recaptcha/ ww
+w.gstatic.cn/recaptcha/ www.recaptcha.net 'wasm-un
+safe-eval';  (1)
+------------------------------
+
+Grade F:
+1. NA (35)
+2. require-trusted-types-for 'script' (32)
+3. require-trusted-types-for 'script';  (9)
+4. frame-ancestors 'self' (6)
+5. frame-ancestors 'none' (4)
+6. script-src 'none'; frame-src 'none'; sandbox (3)
+7. frame-ancestors 'self' https://my.oracle.com https
+://eeho.fa.us2.oraclecloud.com https://blogs.oracl
+e.com (3)
+8. script-src 'none' (3)
+9. frame-ancestors *.mi.com (2)
+10. frame-ancestors  'self' asia.espn.com:* asia.espnq
+a.com:* *.espn.com:* *.espnqa.com:* *.espnsb.com:*
+ *.espnsb.com *.espn.co.uk *.espndeportes.espn.com
+ *.espn.com.br *.espn.com.mx *.espn.com.ve *.espn.
+com.ar *.espn.com.co *.espnfc.com.au *.espn.com.au
+ *.espn.in *.espn.com.sg *.espn.cl *.espn.ph *.esp
+n.ph:* *.espn.com.pe *.espn.com.gt *.espn.com.do *
+.espn.com.ec *.espn.com.uy *.espn.com.pa *.espn.co
+.cr qa.abcnews.go.com preview.abcnews.go.com abc7n
+y.com abc7.com *.abcotvssb.com preview.goodmorning
+america.com http://*.espnqa.com:* http://*.espn.co
+m:* *.abcotvssb.com *.abcnews.go.com *.abcnews.go.
+com:* http://*.abcnews.go.com:* abc30.com abc7news
+.com abc13.com abc7chicago.com 6abc.com abc11.com 
+*.goodmorningamerica.com qa.abc7.com qa.abc30.com 
+qa.abc7news.com qa.abc13.com qa.abc7chicago.com qa
+.6abc.com qa.abc7ny.com qa.abc11.com *.abcnews.go.
+com:* abcnews.go.com qa.secsports.com *.secsports.
+com https://*.espn.com:* *.espnqa.com:* (2)
+------------------------------
+

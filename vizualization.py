@@ -764,15 +764,15 @@ def csp_score():
     return score, url, length_pol, strength_csp, strength_framing, descs
 
 def grade(g):
-    if (g>=90):
+    if (g>=85):
         return "A"
-    elif (80<g<90):
+    elif (70<=g<85):
         return "B"
-    elif (70<=g<80):
-        return "C"
     elif (60<=g<70):
+        return "C"
+    elif (50<=g<60):
         return "D"
-    elif (g<60):
+    elif (g<50):
         return "F"
     
 
@@ -792,8 +792,54 @@ def grading_function():
 
         grades.append(grade_score)
         ret_dict[url[i]+ " "+grade_score] = percent
-        print(url[i]+" "+str(percent)+" "+grade_score+descs[i])
+        if percent > 82:
+
+            print(url[i]+" "+str(percent)+" "+grade_score+descs[i])
 
     return ret_dict, url, grades
 
 grading_function()
+
+
+def grade_distribution():
+    grades = grading_function()[2]
+    grade_counts = {grade: grades.count(grade) for grade in "ABCDF"}
+
+    # Data for plotting
+    grades_ordered = ["A", "B", "C", "D", "F"]
+    counts = [grade_counts.get(grade, 0) for grade in grades_ordered]
+
+    # Grade ranges for annotation
+    grade_ranges = {
+        "A": "85-100",
+        "B": "70-84",
+        "C": "60-69",
+        "D": "50-59",
+        "F": "<50"
+    }
+
+    # Create histogram
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(grades_ordered, counts, color='skyblue')
+
+    plt.xlabel('Grades')
+    plt.ylabel('Frequency')
+    plt.title('Frequency of Letter Grades')
+    plt.xticks(grades_ordered)
+
+    # Determine the range for y-ticks
+    max_count = max(counts)
+    y_tick_max = (max_count // 50 + 1) * 50  # Round up to the nearest 50
+    y_ticks = np.arange(0, y_tick_max, 50)  # Generate y-ticks at intervals of 50
+
+    plt.yticks(y_ticks)
+
+    # Annotate each bar with the grade range
+    for bar, grade in zip(bars, grades_ordered):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2., height,
+                f'{grade_ranges[grade]}', ha='center', va='bottom')
+
+    plt.show()
+
+#grade_distribution()

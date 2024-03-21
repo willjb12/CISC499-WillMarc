@@ -104,18 +104,18 @@ def csp_directive_distribution(db_list):
 def xxss_check(dict_row):
 
     if(dict_row['supports_xxss'] == 'False'):
-        return 0
+        return 0, "no xxss support"
     elif(('1' in dict_row['xxss_data']) and ('block' in dict_row['xxss_data'])):
-        return 15
+        return 15, "xxss 1;mode=block"
         #best
     elif(('1' in dict_row['xxss_data']) and ('block' not in dict_row['xxss_data'])):
-        return 12
+        return 12, "xxss 1"
         #better
     elif(row['xxss_data'] == '0' or dict_row['xxss_data'] == 'None' or dict_row['xxss_data'] == '' or dict_row['xxss_data'] == 'NA'):
-        return 0
+        return 0, "no xxss filter"
         #bad
     else:
-        return 0
+        return 0, "unknown xxss"
     
 # for row in db_list: 
 #     print("XXSS: "+row['supports_xxss']+', '+row['xxss_data']+', Number: '+str(xxss_check(row))+'\n')
@@ -125,15 +125,15 @@ def xfo_check(dict_row):
     
 
     if dict_row['supports_xframe'] == 'False':
-        return 0
+        return 0, "no xfo support"
     elif dict_row['xfo_data'].upper() == 'DENY':
-        return 15
+        return 15, "xfo deny"
     elif dict_row['xfo_data'].upper() == 'SAMEORIGIN':
-        return 15
+        return 15, "xfo sameorigin"
     elif dict_row['xfo_data'].upper() == 'ALLOWALL' or 'ALLOW-FROM' in dict_row['xfo_data'].upper():
-        return 0    
+        return 0, "xfo allowall/allow-from"
     else:
-        return 0
+        return 0, "unknown xfo"
 
 # for row in db_list: 
 #     print("XFO: "+row['supports_xframe']+', '+row['xfo_data']+', Number: '+str(xfo_check(row))+'\n')
@@ -142,13 +142,13 @@ def hsts_check(dict_row):
 
 
     if dict_row['supports_hsts'] == 'False':
-        return 0
+        return 0, "no hsts support"
     elif 'max-age=0' in dict_row['hsts_data']:
-        return 0
+        return 0, "hsts max age 0"
     elif 'max-age' in dict_row['hsts_data']:
-        return 15
+        return 15, "hsts good"
     else:
-        return 0
+        return 0, "unknown hsts"
 
 
 # for row in db_list: 
@@ -158,34 +158,34 @@ def referrer_check(dict_row):
     options = dict_row['referrer_data'].split(',')
 
     if dict_row['supports_referrer_policy'] == 'False':
-        return 0
+        return 0, "no ref policy support"
     
     elif 'unsafe-url' in options:
         
-        return 0
+        return 0, "ref_pol unsafe-url"
     elif 'no-referrer-when-downgrade' in options:
         
-        return 0
+        return 0, "ref_pol uno-referrer-when-downgrade"
     elif 'origin' in options:
         
-        return 5
+        return 5, "ref_pol origin"
     elif 'origin-when-cross-origin' in options:
         
-        return 5
+        return 5, "ref_pol origin-when-cross-origin"
     elif 'strict-origin' in options:
         
-        return 5
+        return 5, 'ref_pol strict-origin'
     elif 'strict-origin-when-cross-origin' in options:
         
-        return 5
+        return 5, "ref_pol strict-origin-when-cross-origin"
     elif 'no-referrer'in options:
         
-        return 10
+        return 10, "ref_pol no-referrer"
     elif 'same-origin' in options:
 
-        return 10
+        return 10, "ref_pol same-origin"
     else:
-        return 0
+        return 0, "unknown ref_pol"
 
 # for row in db_list: 
 #     print("ref: "+row['supports_referrer_policy']+', '+row['referrer_data']+', Number: '+str(referrer_check(row))+'\n')
@@ -656,6 +656,7 @@ def csp_score():
     strength_csp = []
     strength_framing = []
     url = []
+    descs = []
     
     for row in db_list:
         url.append(row['url'])
@@ -667,11 +668,13 @@ def csp_score():
 
         pos = len(score)
 
+        descs.append("")
         if row['header_failed'] != 'True' and row['csp_data'] != 'None' and row['csp_data'] != 'NA':
             strong_csp = True
             strong_framing = True
             length_pol.append(int(row['total_policy_length']) + 1)
             score.append(60)
+            descs[pos] = descs[pos]+ " has csp,"
             script_src_pattern = r"script-src\s+([^;]+);"
             script_src_regex = re.compile(script_src_pattern)
             single_pattern = r"script-src\s+([^;]+)"
@@ -712,19 +715,20 @@ def csp_score():
                     if "unsafe-inline" in default_src:
                         strong_csp = False
                         score[pos] -= 20
+                        descs[pos] = descs[pos]+ " has unsafe-inline in default_src,"
             else:
                 if row['usage_unsafe_inline'] == 'True' and row['num_hash_script_src'] == 0 and row['num_nonce_script_src'] == 0:
                     strong_csp = False
                     score[pos] -= 20
-
+                    descs[pos] = descs[pos]+ " has weak csp,"
             if row['use_of_wildcards'] == 'True':
                 strong_csp == False
                 score[pos] -= 20
-
+                descs[pos] = descs[pos]+ " has wildcards,"
             if row['missing_object_src'] == 'True':
                 strong_csp = False
                 score[pos] -= 20
-
+                descs[pos] = descs[pos]+ " missing object-src,"
             bad_ancestors = ["http:", "https:", "blob:", "data:", "filesystem:", "mediastream:", "wss:", "ws:", "*"]
 
               
@@ -732,6 +736,7 @@ def csp_score():
             for bad in bad_ancestors:
                 if bad in row['frame_ancestors_data']:
                     score[pos] -= 10
+                    descs[pos] = descs[pos]+ " bad ancestors,"
                     strong_framing = False
 
             strength_csp.append(strong_csp)
@@ -745,14 +750,18 @@ def csp_score():
             strength_framing.append(False)
             length_pol.append(None)
 
-        score[pos]+=referrer_check(row)
-        score[pos]+=hsts_check(row)
+        score[pos]+=referrer_check(row)[0]
+        descs[pos] = descs[pos]+ " "+referrer_check(row)[1]+","
+        score[pos]+=hsts_check(row)[0]
+        descs[pos] = descs[pos]+ " "+hsts_check(row)[1]+","
         if strength_csp == False:
-            score[pos]+=xxss_check(row)
+            score[pos]+=xxss_check(row)[0]
+            descs[pos] = descs[pos]+ " "+xxss_check(row)[1]+","
         if strength_framing == False:
-            score[pos]+=xfo_check(row)
+            score[pos]+=xfo_check(row)[0]
+            descs[pos] = descs[pos]+ " "+xfo_check(row)[1]+","
 
-    return score, url, length_pol, strength_csp, strength_framing
+    return score, url, length_pol, strength_csp, strength_framing, descs
 
 def grade(g):
     if (g>=90):
@@ -774,13 +783,17 @@ def grading_function():
     length_pol = ret[2]
     strength_csp = ret[3]
     strengt_framing = ret[4]
+    descs = ret[5]
     grades = []
+    ret_dict = {}
     for i, thing in enumerate(score,0):
-        grade_score = grade((thing/115)*100)
-        print(url[i]+ " "+grade_score+" "+str( round( (thing/115)*100,2 ) ) )
-        grades.append(grade_score)
+        percent = round((thing/115)*100,2)
+        grade_score = grade(percent)
 
-    return url, grades
+        grades.append(grade_score)
+        ret_dict[url[i]+ " "+grade_score] = percent
+        print(url[i]+" "+str(percent)+" "+grade_score+descs[i])
+
+    return ret_dict, url, grades
 
 grading_function()
-        

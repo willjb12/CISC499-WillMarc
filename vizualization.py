@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import numpy as np
 import pandas as pd
+import math
 
 cwd = os.getcwd()
 connection = sqlite3.connect(cwd+"/db/websiteinfo.db")
@@ -354,7 +355,7 @@ for row in db_list:
 #print("Sign in success, no plaintext: "+str(no))
 
 
-non_domain = ['unsafe-inline', 'strict-dynamic', 'unsafe-eval', 'none', 'self', 'data:', 'blob:', 'http:', 'https:', 'upgrade-insecure-requests', '*', '', 'mediastream:', 'filesystem:', 'wasm-unsafe-eval', 'unsafe-hashes', 'report-sample', 'inline-speculation-rules', 'wss:', "script", 'about', 'vkcalls:', 'ws:']
+non_domain = ['android-webview-video-poster:', 'unsafe-inline', 'strict-dynamic', 'unsafe-eval', 'none', 'self', 'data:', 'blob:', 'http:', 'https:', 'upgrade-insecure-requests', '*', '', 'mediastream:', 'filesystem:', 'wasm-unsafe-eval', 'unsafe-hashes', 'report-sample', 'inline-speculation-rules', 'wss:', "script", 'about', 'vkcalls:', 'ws:']
 nonce_hash = ['sha256-', 'sha384-', 'sha512-', 'nonce-']
 
 def make_values_by_row():
@@ -401,6 +402,7 @@ def make_values_by_row():
 def make_domains_by_row(values_by_row):
 
     domains_by_row = values_by_row[0]
+    ordered_urls = values_by_row[1]
 
     for domains in domains_by_row:
         i = 0
@@ -424,7 +426,7 @@ def make_domains_by_row(values_by_row):
 
             i += 1
 
-    return domains_by_row
+    return domains_by_row, ordered_urls
 
 def get_full_csp():
     report_pattern1 = r"report-uri\s+[^;]*;"
@@ -553,7 +555,7 @@ def parse_for_strict_dynamic():
             else:
                 hash_usage.append(False)
 
-    script_src_domains = make_domains_by_row(make_values_by_row())
+    script_src_domains, _ = make_domains_by_row(make_values_by_row())
 
     script_src_length = []
     for domains in script_src_domains:
@@ -562,7 +564,7 @@ def parse_for_strict_dynamic():
     return strict_dynamic_usage, unsafe_inline_usage, nonce_usage, hash_usage, script_src_length, (script_src_by_row, ordered_urls)
 
 def graph_common_allows():
-    domains_by_row = make_domains_by_row(make_values_by_row())
+    domains_by_row, _ = make_domains_by_row(make_values_by_row())
 
     total_domains = []
     for entries in domains_by_row:
@@ -587,17 +589,19 @@ def graph_common_allows():
         allows.append(domain)
         num_allow.append(count)
 
-    bars = plt.barh(range(len(allows[0:40])), num_allow[0:40], align='center')
-    plt.yticks(range(len(allows[0:40])), num_allow[0:40])
+    bars = plt.barh(range(len(allows[0:50])), num_allow[0:50], align='center')
+    plt.yticks(range(len(allows[0:50])), num_allow[0:50])
     plt.xlabel('Number of Policies with entry')
     plt.ylabel('Entry')
-    plt.title('Top 40 Most Common Whitelist Entries')
+    plt.title('Top 50 Most Common Whitelist Entries')
 
     for bar, value in zip(bars, allows):
         plt.text(bar.get_width(), bar.get_y() + bar.get_height()/2, value, 
                 va='center', ha='left', fontsize=8)
         
     plt.show()
+
+#graph_common_allows()
 
 def graph_strict_dynamic():
     strict_dynamic_usage, unsafe_inline_usage, nonce_usage, hash_usage, script_src_length, _ = parse_for_strict_dynamic()
@@ -639,21 +643,23 @@ def graph_strict_dynamic():
             usage_cat.append("other")
 
 
-    percentage_cases = [(num_sd_nh/num_with_script_src)*100, (num_sd_nh_ui/num_with_script_src)*100, (num_nh_ui/num_with_script_src)*100, (num_nh/num_with_script_src)*100, (num_ui/num_with_script_src)*100]
+    percentage_cases = [(num_ui/num_with_script_src)*100, (num_sd_nh/num_with_script_src)*100, (num_sd_nh_ui/num_with_script_src)*100, (num_nh_ui/num_with_script_src)*100, (num_nh/num_with_script_src)*100]
+
+    print(percentage_cases)
     
     for i in range(5):
         percentage_cases[i] = round(percentage_cases[i], 2)
 
-    sorted_percentages = sorted(percentage_cases, reverse=True)
+    #sorted_percentages = sorted(percentage_cases, reverse=True)
     
     colors = plt.cm.viridis(np.linspace(0, 1, len(percentage_cases)))
 
-    plt.bar(range(5), sorted_percentages, color=colors)
+    plt.bar(range(5), percentage_cases, color=colors)
 
-    for i, percentage in enumerate(sorted_percentages):
+    for i, percentage in enumerate(percentage_cases):
         plt.text(i, percentage, f'{percentage:.2f}', ha='center', va='bottom')
 
-    legend_descriptions = {0: 'unsafe-inline', 1: 'unsafe-inline and nonce or hash', 2: 'strict-dynamic, unsafe-inline, and nonce or hash', 3: 'nonce or hash', 4: 'strict-dynamic and nonce or hash'}
+    legend_descriptions = {0: 'unsafe-inline', 1: 'strict-dynamic and nonce or hash', 2: 'strict-dynamic, unsafe-inline, and nonce or hash', 3: 'unsafe-inline and nonce or hash', 4: 'nonce or hash'}
 
     legend_handles = [plt.Rectangle((0,0),1,1, color=colors[i], label=legend_descriptions[i]) for i in range(5)]
     plt.legend(handles=legend_handles, loc='upper right', title='Policies Exclusively with')
@@ -670,41 +676,368 @@ def graph_strict_dynamic():
 
     with_sd_counts = sorted(with_sd_counts, reverse=True)
     without_sd_counts = sorted(without_sd_counts, reverse=True)
+    print(len(with_sd_counts))
+    print(len(without_sd_counts))
 
     plt.figure()
-    plt.barh(range(40), with_sd_counts[0:40], color='blue')
+    plt.barh(range(60), with_sd_counts[0:60], color='blue')
     plt.xlabel('Length of Whitelist')
     plt.ylabel('Policy')
     plt.title('Length of Whitelists for Policies With strict-dynamic')
     plt.tight_layout()
 
     plt.figure()
-    plt.barh(range(40), without_sd_counts[0:40], color='red')
+    plt.barh(range(327), without_sd_counts[0:327], color='red')
     plt.xlabel('Length of Whitelist')
     plt.ylabel('Policy')
     plt.title('Length of Whitelists for Policies Without strict-dynamic')
     plt.tight_layout()
     
 
-    plt.figure()
-    plt.barh(range(150), without_sd_counts[0:150], color='red')
-    plt.xlabel('Length of Whitelist')
-    plt.ylabel('Policy')
-    plt.title('Length of Whitelists for Policies Without strict-dynamic')
-    plt.tight_layout()
+    # plt.figure()
+    # plt.barh(range(150), without_sd_counts[0:150], color='red')
+    # plt.xlabel('Length of Whitelist')
+    # plt.ylabel('Policy')
+    # plt.title('Length of Whitelists for Policies Without strict-dynamic')
+    # plt.tight_layout()
+    plt.show()
+
+#graph_strict_dynamic()
+
+def graph_cspisdead():
+    pass
+
+# number of domains in each policy
+def graph_domain_length():
+    domains_by_row, ordered_urls = make_domains_by_row(make_values_by_row())
+    lengths_by_row = []
+    for i in range(len(domains_by_row)):
+        lengths_by_row.append(len(domains_by_row[i]))
+
+    pairs = sorted(zip(lengths_by_row, ordered_urls), reverse=True)
+
+    sorted_lengths, sorted_urls = zip(*pairs)
+    for i in range(10):
+        print(sorted_urls[i], ": ", sorted_lengths[i])
+
+def encrypted_vs_plaintext():
+    num_plaintext = 0
+    num_encrypted = 0
+    num_success = 0
+    num_total = 0
+    for row in db_list:
+        num_total += 1
+        if row['sign_in_failed'] == "False":
+            num_success += 1
+            if row['sent_in_plaintext'] == "True":
+                num_plaintext += 1
+            else:
+                print(row['url'], ": ", row["post_pass"])
+                num_encrypted += 1
+    
+    print("plaintext: ", num_plaintext)
+    print("encrypted: ", num_encrypted)
+    print("success: ", num_success)
+    print("total: ", num_total)
+
+def policy_counts_total():
+    total = 0
+    with_sd = 0
+    with_n = 0
+    with_h = 0
+    with_ui = 0
+    missing_object = 0
+    wildcard = 0
+    any = 0
+    for row in db_list:
+        if row['header_failed'] != "True" and row['csp_data'] != "None" and ("script-src" in row['csp_data'] or "default-src" in row['csp_data']):
+            total += 1
+            found = False
+            if row['usage_strict_dynamic'] == "True":
+                with_sd += 1
+            if row['usage_unsafe_inline'] == "True" and row['num_nonce'] == '0' and row['usage_strict_dynamic'] != "True":
+                with_ui += 1
+                found = True
+            if row['num_hash'] != '0' and row['num_hash'] != "NA":
+                with_h += 1
+            if row['num_nonce'] != '0' and row['num_nonce'] != "NA":
+                with_n += 1
+            if row['missing_object_src'] == 'True':
+                missing_object += 1
+                found = True
+            if row["use_of_wildcards"] == 'True':
+                wildcard += 1
+                found = True
+            if found == True:
+                any += 1
+            
+
+    print("total with script content restriction: ", total)
+    print("has strict dynamic: ", with_sd)
+    print("has unsafe-inline: ", with_ui)
+    print("has nonce: ", with_n)
+    print("has hash: ", with_h)
+    print("missing object-src: ", missing_object)
+    print("has wildcard: ", wildcard)
+    print("Percentage trivially bypassable: ", (any/total)*100)
+
+    fig, ax = plt.subplots(figsize=(8,6))
+    rows = 7
+    cols = 5
+    ax.set_ylim(-1, rows)
+    ax.set_xlim(0, cols + 2)
+
+    items = [('controls script/\nXXS-protection\npolicies', total, "", "", ""), ('strict-dynamic', with_sd, str(round(with_sd/total, 2)*100)+"%", "0%", "1.0%"), ('nonce', with_n, str(round(with_n/total, 2)*100)+"%", "2.0%", "5.0%"), ('hash', with_h, str(round(with_h/total, 2)*100)+"%", "1.0%", "1.0%"), ('unsafe-inline', with_ui, str(round(with_ui/total, 2)*100)+"%", "87.63%", ""), ('missing object source',missing_object, str(round(missing_object/total, 2)*100)+"%", "9.4%", ""), ('wildcard in policy', wildcard, str(round(wildcard/total, 2)*100)+"%", "21.48%", "")]
+
+    # Adding header text
+    ax.text(0.5, rows, 'Feature', weight='bold', ha='left', va='center')
+    ax.text(2.5, rows, 'Count', weight='bold', ha='center', va='center')
+    ax.text(3.5, rows, 'Percent\n2024', weight='bold', ha='center', va='center')
+    ax.text(4.5, rows, 'Percent\n2016\n(Comparison)', weight='bold', ha='center', va='center')
+    ax.text(5.75, rows, 'Percent\n2018\n(Comparison)', weight='bold', ha='center', va='center')
+
+    # Loop through the dictionary and place text
+    for i, (feature, value, per, six, eight) in enumerate(items):
+        # Feature
+        ax.text(x=0.5, y=rows-i-1, s=feature, va='center', ha='left')
+        # count
+        ax.text(x=2.5, y=rows-i-1, s=value, va='center', ha='center', weight='bold')
+        # percent
+        ax.text(x=3.5, y=rows-i-1, s=per, va='center', ha='center', weight='bold')
+        # comaparison 2016
+        ax.text(x=4.5, y=rows-i-1, s=six,va="center", ha='center', weight='bold')
+        # comparison 2018
+        ax.text(x=5.75, y=rows-i-1, s=eight, va='center', ha='center', weight='bold')
+
+        # Draw horizontal line above each row
+        if i == 0 or i == 6 or i == 9:
+            ax.plot(
+                [0, cols + 2],
+                [rows-i-1.5, rows-i-1.5],
+                ls=':',
+                lw='.5',
+                c='grey'
+            )
+
+    # Draw a horizontal line for the header
+    ax.plot([0, cols + 1.5], [rows-.5, rows-.5], lw='.5', c='black')
+    ax.axis('off')
+    plt.show()
+
+
+#policy_counts_total()
+
+def script_src_length_boxplot():
+    _, _, _, _, script_src_length, _ = parse_for_strict_dynamic()
+
+    plt.figure(figsize=(8, 6))
+    plt.boxplot(script_src_length)
+    plt.ylabel('script-src policy length')
+    plt.grid(True)
     plt.show()
 
 
 
-#graph_strict_dynamic()
 
-def graph_total_length():
-    length = []
+def framing_header_vs_csp_comparison():
+    xfo = []
+    frame_anc = []
+    total = 0
+
     for row in db_list:
-        length.append(row['total_policy_length'])
+        if row['header_failed'] == "False":
+            total += 1
+            if row['frame_ancestors_data'] != "None" and row['frame_ancestors_data'] != "NA":
+                frame_anc.append(True)
+            else:
+                frame_anc.append(False)
+
+            if row['supports_xframe'] == "True":
+                xfo.append(True)
+            else:
+                xfo.append(False)
 
 
+    num_xfo = 0
+    num_frame_anc = 0
+    num_both = 0
+    for i in range(len(xfo)):
+        if xfo[i] == True:
+            num_xfo += 1
+        if frame_anc[i] == True:
+            num_frame_anc += 1
+        if xfo[i] == True and frame_anc[i] == True:
+            num_both += 1
+
+    numbers = [num_xfo, num_frame_anc, num_both]
+    labels = ['X-Frame-Options', 'CSP frame-ancestors', 'Both']
+
+    plt.figure(figsize=(8, 6))
+    bars = plt.bar(labels, numbers, color='skyblue')
+    plt.title("Usage of Framing Controls 2024")
+    plt.ylabel('# of Sites')
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, height, f'{int(height)}', ha='center', va='bottom')
+
+    plt.grid(False)
+    plt.show()
+
+framing_header_vs_csp_comparison()
+    
+def comparison_graphs():
+    numbers = [3253, 409, 270]
+    labels = ['X-Frame-Options', 'CSP frame-ancestors', 'Both']
+
+    plt.figure(figsize=(8, 6))
+    bars = plt.bar(labels, numbers, color='skyblue')
+    plt.title("Framing Controls 2018")
+    plt.ylabel('# of Sites')
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, height, f'{int(height)}', ha='center', va='bottom')
+
+    plt.grid(False)
+
+
+    numbers = [90, 350, 260, 65, 450]
+    labels = ['block-all-mixed-content', 'upgrade-insecure-requests', 'STS', 'Whitelist https: scheme', 'TLS enforcement']
+
+    plt.figure(figsize=(8, 6))
+    bars = plt.bar(labels, numbers, color='skyblue')
+    plt.title("TLS Enforcement Strategies 2018")
+    plt.ylabel('# of Sites')
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, height, f'{int(height)}', ha='center', va='bottom')
+
+    plt.grid(False)
+    plt.show()
+
+#comparison_graphs()
+    
+
+    
+def referrer_header_vs_csp_comparison():
+    header = []
+    csp = []
+    total = 0
+
+    for row in db_list:
+        if row['header_failed'] == "False":
+            total += 1
+            if row['referrer_data'] != "None" and row['referrer_data'] != "NA":
+                header.append(True)
+            else:
+                header.append(False)
+
+            if "referrer" in row['csp_data']:
+                csp.append(True)
+            else:
+                csp.append(False)
+
+
+    num_csp = 0
+    num_header = 0
+    num_both = 0
+    for i in range(len(csp)):
+        if csp[i] == True:
+            num_csp += 1
+        if header[i] == True:
+            num_header += 1
+        if csp[i] == True and header[i] == True:
+            num_both += 1
+
+    numbers = [num_header, num_csp, num_both]
+    labels = ['referrer-policy header', 'referrer CSP', 'Both']
+
+    plt.figure(figsize=(8, 6))
+    bars = plt.bar(labels, numbers, color='skyblue')
+    plt.title("Usage of referrer ")
+    plt.ylabel('# of Sites')
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, height, f'{int(height)}', ha='center', va='bottom')
+
+    plt.grid(False)
+    plt.show()
+
+#referrer_header_vs_csp_comparison()
+
+
+def tls_enforcement_strategies():
+    block_all_mixed_content = []
+    upgrade_insecure_requests = []
+    hsts = []
+    whitelist_https = []
+    any = []
+    total = 0
+
+    for row in db_list:
+        if row['header_failed'] != "True":
+            total += 1
+            found = False
+            if "block-all-mixed-content" in row['csp_data']:
+                block_all_mixed_content.append(True)
+                found = True
+            else:
+                block_all_mixed_content.append(False)
+            if 'upgrade-insecure-requests' in row['csp_data']:
+                upgrade_insecure_requests.append(True)
+                found = True
+            else:
+                upgrade_insecure_requests.append(False)
+            if 'max-age' in row["hsts_data"]:
+                hsts.append(True)
+                found = True
+            else:
+                hsts.append(False)
+            if "https: " in row['csp_data']:
+                whitelist_https.append(True)
+                found = True
+            else:
+                whitelist_https.append(False)
+            if found:
+                any.append(True)
+            else:
+                any.append(False)
         
+    num_block_all = sum(block_all_mixed_content)
+    num_upgrade = sum(upgrade_insecure_requests)
+    num_hsts = sum(hsts)
+    num_whitelist = sum(whitelist_https)
+    num_any = sum(any)
+
+    block_all_and_upgrade = 0
+    for i in range(len(hsts)):
+        if block_all_mixed_content[i] == True and upgrade_insecure_requests[i] == True:
+            block_all_and_upgrade += 1
+
+    print("Percentage of sites with any tls enforcement: ", (num_any/total)*100)
+    print("Number of sites with block-all-mixed-content and upgrade-insecure-requests directives:", block_all_and_upgrade)
+
+    numbers = [num_block_all, num_upgrade, num_hsts, num_whitelist, num_any]
+    labels = ['block-all-mixed-content', 'upgrade-insecure-requests', 'STS', 'Whitelist https: scheme', 'TLS enforcement']
+
+    plt.figure(figsize=(8, 6))
+    bars = plt.bar(labels, numbers, color='skyblue')
+    plt.title("TLS Enforcement Strategies")
+    plt.ylabel('# of Sites')
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, height, f'{int(height)}', ha='center', va='bottom')
+
+    plt.grid(False)
+    plt.show()
+
+#tls_enforcement_strategies()
+
+
 def csp_score():
     score = []
     length_pol = []
@@ -955,6 +1288,17 @@ def graph_grade_by_whitelist():
     plt.suptitle('Distribution of Policy Lengths by Grade')
     plt.show()
 
+
+#graph_grade_by_whitelist()
+
+
+def shannon_entropy(probabilities):
+    entropy = 0
+    for p in probabilities:
+        if p != 0:
+            entropy -= p * math.log2(p)
+    return entropy
+
 def graph_grade_by_policy_frequency():
     grade = grading_function()
     
@@ -1052,6 +1396,22 @@ def graph_grade_by_policy_frequency():
                 file.write(f"{i}. {policy_with_newlines} ({count})\n")
             file.write("-" * 30 + "\n\n")
 
+    ent_by_grade = []
+    for grade in grades:
+        top_policies = sorted(policy_frequencies[grade].items(), key=lambda x: x[1], reverse=True)[:10]
+        total = 0
+        for _, count in top_policies:
+            total += count
+
+        probs = []
+        for _, count in top_policies:
+            probs.append(count/total)
+
+        ent_by_grade.append(shannon_entropy(probs))
+
+    for i, grade in enumerate(grades):
+        print("Entropy of policies for ", grade, ": ", ent_by_grade[i])
+
 
 
 
@@ -1104,6 +1464,8 @@ def graph_grade_by_avg_length():
     plt.gca().invert_yaxis()  
     plt.show()
 
+
+#graph_grade_by_avg_length()
 
 # Use this to test the grading
 def show_grades():
